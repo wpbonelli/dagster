@@ -1,13 +1,12 @@
 # pylint: disable=protected-access
 # pylint: disable=unused-variable
-import copy
 
 import dagster_aws
 import pytest
 from botocore.exceptions import ClientError
 from dagster_aws.ecs import EcsEventualConsistencyTimeout
 from dagster_aws.ecs.launcher import RUNNING_STATUSES, STOPPED_STATUSES
-from dagster_aws.ecs.tasks import TaskMetadata
+from dagster_aws.ecs.tasks import DagsterEcsTaskDefinitionConfig
 
 from dagster._check import CheckError
 from dagster._core.code_pointer import FileCodePointer
@@ -148,90 +147,64 @@ def test_task_definition_registration(
     assert len(ecs.list_task_definitions()["taskDefinitionArns"]) == len(task_definitions) + 1
 
 
-def test_reuse_task_definition(instance):
-    image = "image"
-    secrets = []
+def test_reuse_task_definition(instance, ecs):
+    family = "my-location-family"
+    image = "hello_world:latest"
+    secrets = [
+        {
+            "name": "FOO",
+            "valueFrom": "arn:aws:secretsmanager:us-west-2:111122223333:secret:aes128-1a2b3c",
+        },
+    ]
     environment = [
         {
             "name": "MY_ENV_VAR",
             "value": "MY_VALUE",
         }
     ]
-    original_task_definition = {
-        "containerDefinitions": [
-            {
-                "image": image,
-                "name": instance.run_launcher.container_name,
-                "secrets": secrets,
-                "environment": environment,
-            },
-        ],
-    }
-    metadata = TaskMetadata(
-        cluster="cluster",
-        subnets=[],
-        security_groups=[],
-        task_definition=original_task_definition,
-        container_definition={},
-        assign_public_ip=True,
+    container_name = instance.run_launcher.container_name
+
+    desired_task_definition_config = DagsterEcsTaskDefinitionConfig(
+        family="my-location-family",
+        image=image,
+        container_name=container_name,
+        command=None,
+        log_configuration=None,
+        secrets=secrets,
+        environment=environment,
+        execution_role_arn=None,
+        task_role_arn=None,
     )
 
-    # The same task definition passes
-    task_definition = copy.deepcopy(original_task_definition)
-    assert instance.run_launcher._reuse_task_definition(
-        task_definition, metadata, image, secrets, environment
-    )
+    # New task definition not re-used
+    assert not instance.run_launcher._reuse_task_definition(desired_task_definition_config)
+
+    # Once it's registered, it is re-used
+    ecs.register_task_definition(**desired_task_definition_config.task_definition_dict())
+    assert instance.run_launcher._reuse_task_definition(desired_task_definition_config)
 
     # Changed image fails
-    task_definition = copy.deepcopy(original_task_definition)
-    task_definition["containerDefinitions"][0]["image"] = "new-image"
+
     assert not instance.run_launcher._reuse_task_definition(
-        task_definition, metadata, image, secrets, environment
+        desired_task_definition_config._replace(image="new-image")
     )
 
     # Changed container name fails
-    task_definition = copy.deepcopy(original_task_definition)
-    task_definition["containerDefinitions"][0]["name"] = "new-container"
     assert not instance.run_launcher._reuse_task_definition(
-        task_definition, metadata, image, secrets, environment
+        desired_task_definition_config._replace(container_name="new-container")
     )
 
     # Changed secrets fails
-    task_definition = copy.deepcopy(original_task_definition)
-    task_definition["containerDefinitions"][0]["secrets"].append("new-secrets")
     assert not instance.run_launcher._reuse_task_definition(
-        task_definition, metadata, image, secrets, environment
-    )
-
-    # Changed environment fails
-
-    task_definition = copy.deepcopy(original_task_definition)
-    task_definition["containerDefinitions"][0]["environment"].append(
-        {"name": "MY_ENV_VAR", "value": "MY_ENV_VALUE"}
-    )
-    assert not instance.run_launcher._reuse_task_definition(
-        task_definition, metadata, image, secrets, environment
-    )
-
-    # Changed execution role fails
-    task_definition = copy.deepcopy(original_task_definition)
-    task_definition["executionRoleArn"] = "new-role"
-    assert not instance.run_launcher._reuse_task_definition(
-        task_definition, metadata, image, secrets, environment
-    )
-
-    # Changed task role fails
-    task_definition = copy.deepcopy(original_task_definition)
-    task_definition["taskRoleArn"] = "new-role"
-    assert not instance.run_launcher._reuse_task_definition(
-        task_definition, metadata, image, secrets, environment
-    )
-
-    # Any other diff passes
-    task_definition = copy.deepcopy(original_task_definition)
-    task_definition["somethingElse"] = "boom"
-    assert instance.run_launcher._reuse_task_definition(
-        task_definition, metadata, image, secrets, environment
+        desired_task_definition_config._replace(
+            secrets=[
+                *secrets,
+                {
+                    "name": "BAR",
+                    "valueFrom": "arn:aws:secretsmanager:us-west-2:111122223333:secret:aes192-4D5e6F",
+                },
+            ]
+        )
     )
 
 
