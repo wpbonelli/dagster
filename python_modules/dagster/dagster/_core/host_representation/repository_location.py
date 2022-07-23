@@ -3,7 +3,7 @@ import sys
 import threading
 from abc import abstractmethod
 from contextlib import AbstractContextManager
-from typing import TYPE_CHECKING, Any, Dict, Mapping, Optional, Sequence, Union, cast
+from typing import TYPE_CHECKING, Any, Mapping, Optional, Sequence, Union, cast
 
 import dagster._check as check
 from dagster._api.get_server_id import sync_get_server_id
@@ -611,7 +611,7 @@ class GrpcServerRepositoryLocation(RepositoryLocation):
 
     @property
     def repository_code_pointer_dict(self) -> Mapping[str, CodePointer]:
-        return cast(Dict[str, CodePointer], self._repository_code_pointer_dict)
+        return cast(Mapping[str, CodePointer], self._repository_code_pointer_dict)
 
     @property
     def executable_path(self) -> Optional[str]:

@@ -399,11 +399,11 @@ class ScalarUnion(ConfigType):
         )
 
 
-ConfigAnyInstance = Any()
-ConfigBoolInstance = Bool()
-ConfigFloatInstance = Float()
-ConfigIntInstance = Int()
-ConfigStringInstance = String()
+ConfigAnyInstance: Any = Any()
+ConfigBoolInstance: Bool = Bool()
+ConfigFloatInstance: Float = Float()
+ConfigIntInstance: Int = Int()
+ConfigStringInstance: String = String()
 
 _CONFIG_MAP: Dict[check.TypeOrTupleOfTypes, ConfigType] = {
     BuiltinEnum.ANY: ConfigAnyInstance,

@@ -298,7 +298,7 @@ def execute_pipeline_iterator(
     run_config: Optional[Mapping[str, object]] = None,
     mode: Optional[str] = None,
     preset: Optional[str] = None,
-    tags: Optional[Mapping[str, Any]] = None,
+    tags: Optional[Mapping[str, object]] = None,
     solid_selection: Optional[Sequence[str]] = None,
     instance: Optional[DagsterInstance] = None,
 ) -> Iterator[DagsterEvent]:
@@ -570,10 +570,10 @@ def execute_job(
 
 def execute_pipeline(
     pipeline: Union[PipelineDefinition, IPipeline],
-    run_config: Optional[Mapping] = None,
+    run_config: Optional[Mapping[str, object]] = None,
     mode: Optional[str] = None,
     preset: Optional[str] = None,
-    tags: Optional[Mapping[str, Any]] = None,
+    tags: Optional[Mapping[str, object]] = None,
     solid_selection: Optional[Sequence[str]] = None,
     instance: Optional[DagsterInstance] = None,
     raise_on_error: bool = True,
@@ -630,10 +630,10 @@ def execute_pipeline(
 def _logged_execute_pipeline(
     pipeline: Union[IPipeline, PipelineDefinition],
     instance: DagsterInstance,
-    run_config: Optional[dict] = None,
+    run_config: Optional[Mapping[str, object]] = None,
     mode: Optional[str] = None,
     preset: Optional[str] = None,
-    tags: Optional[Mapping[str, Any]] = None,
+    tags: Optional[Mapping[str, object]] = None,
     solid_selection: Optional[Sequence[str]] = None,
     raise_on_error: bool = True,
 ) -> PipelineExecutionResult:
@@ -679,11 +679,11 @@ def _logged_execute_pipeline(
 def reexecute_pipeline(
     pipeline: Union[IPipeline, PipelineDefinition],
     parent_run_id: str,
-    run_config: Optional[Mapping] = None,
+    run_config: Optional[Mapping[str, object]] = None,
     step_selection: Optional[Sequence[str]] = None,
     mode: Optional[str] = None,
     preset: Optional[str] = None,
-    tags: Optional[Mapping[str, Any]] = None,
+    tags: Optional[Mapping[str, object]] = None,
     instance: Optional[DagsterInstance] = None,
     raise_on_error: bool = True,
 ) -> PipelineExecutionResult:
@@ -782,6 +782,7 @@ def reexecute_pipeline(
             execute_instance,
             raise_on_error=raise_on_error,
         )
+    check.failed("Should not reach here.")
 
 
 def reexecute_pipeline_iterator(
@@ -791,7 +792,7 @@ def reexecute_pipeline_iterator(
     step_selection: Optional[Sequence[str]] = None,
     mode: Optional[str] = None,
     preset: Optional[str] = None,
-    tags: Optional[Mapping[str, Any]] = None,
+    tags: Optional[Mapping[str, object]] = None,
     instance: Optional[DagsterInstance] = None,
 ) -> Iterator[DagsterEvent]:
     """Reexecute a pipeline iteratively.
@@ -878,6 +879,7 @@ def reexecute_pipeline_iterator(
         )
 
         return execute_run_iterator(pipeline, pipeline_run, execute_instance)
+    check.failed("Should not reach here.")
 
 
 def execute_plan_iterator(
@@ -916,7 +918,7 @@ def execute_plan(
     pipeline: IPipeline,
     instance: DagsterInstance,
     pipeline_run: PipelineRun,
-    run_config: Optional[Mapping] = None,
+    run_config: Optional[Mapping[str, object]] = None,
     retry_mode: Optional[RetryMode] = None,
 ) -> Sequence[DagsterEvent]:
     """This is the entry point of dagster-graphql executions. For the dagster CLI entry point, see
@@ -984,7 +986,7 @@ def create_execution_plan(
     step_keys_to_execute: Optional[Sequence[str]] = None,
     known_state: Optional[KnownExecutionState] = None,
     instance_ref: Optional[InstanceRef] = None,
-    tags: Optional[Mapping[str, str]] = None,
+    tags: Optional[Mapping[str, object]] = None,
 ) -> ExecutionPlan:
     pipeline = _check_pipeline(pipeline)
     pipeline_def = pipeline.get_definition()
@@ -1144,16 +1146,16 @@ class ExecuteRunWithPlanIterable:
 
 def _check_execute_pipeline_args(
     pipeline: Union[PipelineDefinition, IPipeline],
-    run_config: Optional[Mapping],
+    run_config: Optional[Mapping[str, object]],
     mode: Optional[str],
     preset: Optional[str],
-    tags: Optional[Mapping[str, Any]],
+    tags: Optional[Mapping[str, object]],
     solid_selection: Optional[Sequence[str]] = None,
 ) -> Tuple[
     IPipeline,
     Optional[Mapping],
     Optional[str],
-    Mapping[str, Any],
+    Mapping[str, object],
     Optional[FrozenSet[str]],
     Optional[Sequence[str]],
 ]:
