@@ -1,5 +1,17 @@
 from datetime import datetime, time
-from typing import Any, Callable, Dict, Iterable, List, NamedTuple, Optional, Sequence, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Sequence,
+    Union,
+    cast,
+)
 
 import pendulum
 
@@ -214,9 +226,9 @@ class DailyPartitionsDefinition(TimeWindowPartitionsDefinition):
 
 
 def wrap_time_window_tags_fn(
-    tags_fn: Optional[Callable[[datetime, datetime], Dict[str, str]]]
-) -> Callable[[Partition], Dict[str, str]]:
-    def _tag_wrapper(partition: Partition) -> Dict[str, str]:
+    tags_fn: Optional[Callable[[datetime, datetime], Mapping[str, str]]]
+) -> Callable[[Partition], Mapping[str, str]]:
+    def _tag_wrapper(partition: Partition) -> Mapping[str, str]:
         if not tags_fn:
             return {}
         return tags_fn(cast(datetime, partition.value[0]), cast(datetime, partition.value[1]))
@@ -231,7 +243,7 @@ def daily_partitioned_config(
     timezone: Optional[str] = None,
     fmt: Optional[str] = None,
     end_offset: int = 0,
-    tags_for_partition_fn: Optional[Callable[[datetime, datetime], Dict[str, str]]] = None,
+    tags_for_partition_fn: Optional[Callable[[datetime, datetime], Mapping[str, str]]] = None,
 ) -> Callable[[Callable[[datetime, datetime], Dict[str, Any]]], PartitionedConfig]:
     """Defines run config over a set of daily partitions.
 
@@ -270,7 +282,7 @@ def daily_partitioned_config(
         # creates partitions (2022-03-12-16:15, 2022-03-13-16:15), (2022-03-13-16:15, 2022-03-14-16:15), ...
     """
 
-    def inner(fn: Callable[[datetime, datetime], Dict[str, Any]]) -> PartitionedConfig:
+    def inner(fn: Callable[[datetime, datetime], Mapping[str, Any]]) -> PartitionedConfig:
         check.callable_param(fn, "fn")
 
         return PartitionedConfig(
@@ -349,7 +361,7 @@ def hourly_partitioned_config(
     timezone: Optional[str] = None,
     fmt: Optional[str] = None,
     end_offset: int = 0,
-    tags_for_partition_fn: Optional[Callable[[datetime, datetime], Dict[str, str]]] = None,
+    tags_for_partition_fn: Optional[Callable[[datetime, datetime], Mapping[str, str]]] = None,
 ) -> Callable[[Callable[[datetime, datetime], Dict[str, Any]]], PartitionedConfig]:
     """Defines run config over a set of hourly partitions.
 
@@ -387,7 +399,7 @@ def hourly_partitioned_config(
         # creates partitions (2022-03-12-00:15, 2022-03-12-01:15), (2022-03-12-01:15, 2022-03-12-02:15), ...
     """
 
-    def inner(fn: Callable[[datetime, datetime], Dict[str, Any]]) -> PartitionedConfig:
+    def inner(fn: Callable[[datetime, datetime], Mapping[str, Any]]) -> PartitionedConfig:
         check.callable_param(fn, "fn")
 
         return PartitionedConfig(

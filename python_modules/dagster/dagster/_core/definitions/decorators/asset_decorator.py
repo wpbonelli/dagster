@@ -63,7 +63,7 @@ def asset(
     compute_kind: Optional[str] = ...,
     dagster_type: Optional[DagsterType] = ...,
     partitions_def: Optional[PartitionsDefinition] = ...,
-    op_tags: Optional[Dict[str, Any]] = ...,
+    op_tags: Optional[Mapping[str, Any]] = ...,
     group_name: Optional[str] = ...,
 ) -> Callable[[Callable[..., Any]], AssetsDefinition]:
     ...
@@ -86,7 +86,7 @@ def asset(
     compute_kind: Optional[str] = None,
     dagster_type: Optional[DagsterType] = None,
     partitions_def: Optional[PartitionsDefinition] = None,
-    op_tags: Optional[Dict[str, Any]] = None,
+    op_tags: Optional[Mapping[str, Any]] = None,
     group_name: Optional[str] = None,
 ) -> Union[AssetsDefinition, Callable[[Callable[..., Any]], AssetsDefinition]]:
     """Create a definition for how to compute an asset.
@@ -199,7 +199,7 @@ class _Asset:
         compute_kind: Optional[str] = None,
         dagster_type: Optional[DagsterType] = None,
         partitions_def: Optional[PartitionsDefinition] = None,
-        op_tags: Optional[Dict[str, Any]] = None,
+        op_tags: Optional[Mapping[str, Any]] = None,
         group_name: Optional[str] = None,
     ):
         self.name = name
@@ -300,7 +300,7 @@ def multi_asset(
     compute_kind: Optional[str] = None,
     internal_asset_deps: Optional[Mapping[str, Set[AssetKey]]] = None,
     partitions_def: Optional[PartitionsDefinition] = None,
-    op_tags: Optional[Dict[str, Any]] = None,
+    op_tags: Optional[Mapping[str, Any]] = None,
     can_subset: bool = False,
     resource_defs: Optional[Mapping[str, ResourceDefinition]] = None,
     group_name: Optional[str] = None,
@@ -350,7 +350,7 @@ def multi_asset(
     if resource_defs is not None:
         experimental_arg_warning("resource_defs", "multi_asset")
 
-    asset_deps = check.opt_dict_param(
+    asset_deps = check.opt_mapping_param(
         internal_asset_deps, "internal_asset_deps", key_type=str, value_type=set
     )
     required_resource_keys = check.opt_set_param(

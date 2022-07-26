@@ -536,7 +536,7 @@ from dagster.version import __version__
 
 # isort: split
 import importlib
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Sequence
 from typing import Any as TypingAny
 from typing import Callable, Mapping
 from typing import Tuple as TypingTuple
@@ -590,5 +590,5 @@ def __getattr__(name: str) -> TypingAny:
         raise AttributeError("module '{}' has no attribute '{}'".format(__name__, name))
 
 
-def __dir__(_self):
+def __dir__(_self) -> Sequence:
     return [*globals(), *_DEPRECATED.keys(), *_DEPRECATED_RENAMED.keys()]

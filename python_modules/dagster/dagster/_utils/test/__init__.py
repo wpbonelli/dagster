@@ -4,7 +4,17 @@ import tempfile
 import uuid
 from collections import defaultdict
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, AbstractSet, Any, Dict, Generator, Optional, Union, overload
+from typing import (
+    TYPE_CHECKING,
+    AbstractSet,
+    Any,
+    Dict,
+    Generator,
+    Mapping,
+    Optional,
+    Union,
+    overload,
+)
 
 # top-level include is dangerous in terms of incurring circular deps
 from dagster import (
@@ -65,9 +75,9 @@ if TYPE_CHECKING:
 
 
 def create_test_pipeline_execution_context(
-    logger_defs: Optional[Dict[str, LoggerDefinition]] = None
+    logger_defs: Optional[Mapping[str, LoggerDefinition]] = None
 ) -> PlanExecutionContext:
-    loggers = check.opt_dict_param(
+    loggers = check.opt_mapping_param(
         logger_defs, "logger_defs", key_type=str, value_type=LoggerDefinition
     )
     mode_def = ModeDefinition(logger_defs=loggers)
@@ -105,10 +115,10 @@ def _dep_key_of(solid):
 
 
 def build_pipeline_with_input_stubs(
-    pipeline_def: PipelineDefinition, inputs: Dict[str, dict]
+    pipeline_def: PipelineDefinition, inputs: Mapping[str, dict]
 ) -> PipelineDefinition:
     check.inst_param(pipeline_def, "pipeline_def", PipelineDefinition)
-    check.dict_param(inputs, "inputs", key_type=str, value_type=dict)
+    check.mapping_param(inputs, "inputs", key_type=str, value_type=dict)
 
     deps: Dict[str, Dict[str, object]] = defaultdict(dict)
     for solid_name, dep_dict in pipeline_def.dependencies.items():
@@ -148,13 +158,13 @@ def build_pipeline_with_input_stubs(
 def execute_solids_within_pipeline(
     pipeline_def: PipelineDefinition,
     solid_names: AbstractSet[str],
-    inputs: Optional[Dict[str, dict]] = None,
-    run_config: Optional[Dict[str, object]] = None,
+    inputs: Optional[Mapping[str, dict]] = None,
+    run_config: Optional[Mapping[str, object]] = None,
     mode: Optional[str] = None,
     preset: Optional[str] = None,
-    tags: Optional[Dict[str, str]] = None,
+    tags: Optional[Mapping[str, str]] = None,
     instance: Optional[DagsterInstance] = None,
-) -> Dict[str, Union["CompositeSolidExecutionResult", "SolidExecutionResult"]]:
+) -> Mapping[str, Union["CompositeSolidExecutionResult", "SolidExecutionResult"]]:
     """Execute a set of solids within an existing pipeline.
 
     Intended to support tests. Input values may be passed directly.
@@ -182,7 +192,7 @@ def execute_solids_within_pipeline(
     """
     check.inst_param(pipeline_def, "pipeline_def", PipelineDefinition)
     check.set_param(solid_names, "solid_names", of_type=str)
-    inputs = check.opt_dict_param(inputs, "inputs", key_type=str, value_type=dict)
+    inputs = check.opt_mapping_param(inputs, "inputs", key_type=str, value_type=dict)
 
     sub_pipeline = pipeline_def.get_pipeline_subset_def(solid_names)
     stubbed_pipeline = build_pipeline_with_input_stubs(sub_pipeline, inputs)
@@ -283,9 +293,9 @@ def yield_empty_pipeline_context(
 def execute_solid(
     solid_def: CompositeSolidDefinition,
     mode_def: Optional[ModeDefinition] = ...,
-    input_values: Optional[Dict[str, object]] = ...,
-    tags: Optional[Dict[str, Any]] = ...,
-    run_config: Optional[Dict[str, object]] = ...,
+    input_values: Optional[Mapping[str, object]] = ...,
+    tags: Optional[Mapping[str, Any]] = ...,
+    run_config: Optional[Mapping[str, object]] = ...,
     raise_on_error: bool = ...,
 ) -> "CompositeSolidExecutionResult":
     ...
@@ -295,9 +305,9 @@ def execute_solid(
 def execute_solid(
     solid_def: SolidDefinition,
     mode_def: Optional[ModeDefinition] = ...,
-    input_values: Optional[Dict[str, object]] = ...,
-    tags: Optional[Dict[str, Any]] = ...,
-    run_config: Optional[Dict[str, object]] = ...,
+    input_values: Optional[Mapping[str, object]] = ...,
+    tags: Optional[Mapping[str, Any]] = ...,
+    run_config: Optional[Mapping[str, object]] = ...,
     raise_on_error: bool = ...,
 ) -> "SolidExecutionResult":
     ...
@@ -306,9 +316,9 @@ def execute_solid(
 def execute_solid(
     solid_def: NodeDefinition,
     mode_def: Optional[ModeDefinition] = None,
-    input_values: Optional[Dict[str, object]] = None,
-    tags: Optional[Dict[str, Any]] = None,
-    run_config: Optional[Dict[str, object]] = None,
+    input_values: Optional[Mapping[str, object]] = None,
+    tags: Optional[Mapping[str, Any]] = None,
+    run_config: Optional[Mapping[str, object]] = None,
     raise_on_error: bool = True,
 ) -> Union["CompositeSolidExecutionResult", "SolidExecutionResult"]:
     """Execute a single solid in an ephemeral pipeline.
@@ -336,7 +346,7 @@ def execute_solid(
     """
     check.inst_param(solid_def, "solid_def", NodeDefinition)
     check.opt_inst_param(mode_def, "mode_def", ModeDefinition)
-    input_values = check.opt_dict_param(input_values, "input_values", key_type=str)
+    input_values = check.opt_mapping_param(input_values, "input_values", key_type=str)
     solid_defs = [solid_def]
 
     def create_value_solid(input_name, input_value):

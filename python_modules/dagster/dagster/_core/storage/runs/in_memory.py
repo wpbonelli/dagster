@@ -1,5 +1,5 @@
 from collections import OrderedDict, defaultdict
-from typing import Callable, Dict, Iterable, List, Optional, Set, Tuple, Union, cast
+from typing import Callable, Dict, Iterable, Mapping, Optional, Sequence, Set, Tuple, Union, cast
 
 import dagster._check as check
 from dagster._core.errors import (
@@ -126,7 +126,7 @@ class InMemoryRunStorage(RunStorage):
         cursor: Optional[str] = None,
         limit: Optional[int] = None,
         bucket_by: Optional[Union[JobBucket, TagBucket]] = None,
-    ) -> List[PipelineRun]:
+    ) -> Sequence[PipelineRun]:
         check.opt_inst_param(filters, "filters", RunsFilter)
         check.opt_str_param(cursor, "cursor")
         check.opt_int_param(limit, "limit")
@@ -159,7 +159,7 @@ class InMemoryRunStorage(RunStorage):
 
     def _slice(
         self,
-        items: List,
+        items: Sequence,
         cursor: Optional[str],
         limit: Optional[int] = None,
         key_fn: Callable = lambda _: _.run_id,
@@ -193,7 +193,7 @@ class InMemoryRunStorage(RunStorage):
         ascending: bool = False,
         cursor: Optional[str] = None,
         bucket_by: Optional[Union[JobBucket, TagBucket]] = None,
-    ) -> List[RunRecord]:
+    ) -> Sequence[RunRecord]:
         check.opt_inst_param(filters, "filters", RunsFilter)
         check.opt_str_param(cursor, "cursor")
         check.opt_int_param(limit, "limit")
@@ -215,7 +215,7 @@ class InMemoryRunStorage(RunStorage):
             for record in sliced
         ]
 
-    def get_run_tags(self) -> List[Tuple[str, Set[str]]]:
+    def get_run_tags(self) -> Sequence[Tuple[str, Set[str]]]:
         all_tags = defaultdict(set)
         for _run_id, tags in self._run_tags.items():
             for k, v in tags.items():
@@ -223,9 +223,9 @@ class InMemoryRunStorage(RunStorage):
 
         return sorted([(k, v) for k, v in all_tags.items()], key=lambda x: x[0])
 
-    def add_run_tags(self, run_id: str, new_tags: Dict[str, str]):
+    def add_run_tags(self, run_id: str, new_tags: Mapping[str, str]):
         check.str_param(run_id, "run_id")
-        check.dict_param(new_tags, "new_tags", key_type=str, value_type=str)
+        check.mapping_param(new_tags, "new_tags", key_type=str, value_type=str)
         run = self._runs[run_id]
         run_tags = merge_dicts(run.tags if run.tags else {}, new_tags)
         self._runs[run_id] = run.with_tags(run_tags)
@@ -280,7 +280,7 @@ class InMemoryRunStorage(RunStorage):
     def wipe(self):
         self._init_storage()
 
-    def get_run_group(self, run_id: str) -> Optional[Tuple[str, List[PipelineRun]]]:
+    def get_run_group(self, run_id: str) -> Optional[Tuple[str, Sequence[PipelineRun]]]:
         check.str_param(run_id, "run_id")
         pipeline_run = self._runs.get(run_id)
         if not pipeline_run:
@@ -306,7 +306,7 @@ class InMemoryRunStorage(RunStorage):
         filters: Optional[RunsFilter] = None,
         cursor: Optional[str] = None,
         limit: Optional[int] = None,
-    ) -> Dict[str, Dict[str, Union[Iterable[PipelineRun], int]]]:
+    ) -> Mapping[str, Mapping[str, Union[Iterable[PipelineRun], int]]]:
         runs = self.get_runs(filters=filters, cursor=cursor, limit=limit)
         root_run_id_to_group: Dict[str, Dict[str, PipelineRun]] = defaultdict(dict)
         for run in runs:
@@ -339,7 +339,7 @@ class InMemoryRunStorage(RunStorage):
             for root_run_id, run_group in root_run_id_to_group.items()
         }
 
-    def get_run_partition_data(self, runs_filter: RunsFilter) -> List[RunPartitionData]:
+    def get_run_partition_data(self, runs_filter: RunsFilter) -> Sequence[RunPartitionData]:
         """Get run partition data for a given partitioned job."""
         run_filter = build_run_filter(runs_filter)
         matching_runs = list(filter(run_filter, list(self._runs.values())[::-1]))
@@ -366,7 +366,7 @@ class InMemoryRunStorage(RunStorage):
             "The dagster daemon lives in a separate process. It cannot use in memory storage."
         )
 
-    def get_daemon_heartbeats(self) -> Dict[str, DaemonHeartbeat]:
+    def get_daemon_heartbeats(self) -> Mapping[str, DaemonHeartbeat]:
         return {}
 
     def wipe_daemon_heartbeats(self):
@@ -379,7 +379,7 @@ class InMemoryRunStorage(RunStorage):
         status: Optional[BulkActionStatus] = None,
         cursor: Optional[str] = None,
         limit: Optional[int] = None,
-    ) -> List[PartitionBackfill]:
+    ) -> Sequence[PartitionBackfill]:
         check.opt_inst_param(status, "status", BulkActionStatus)
         backfills = [
             backfill
@@ -403,8 +403,8 @@ class InMemoryRunStorage(RunStorage):
     def supports_kvs(self):
         return False
 
-    def kvs_get(self, keys: Set[str]) -> Dict[str, str]:
+    def kvs_get(self, keys: Set[str]) -> Mapping[str, str]:
         raise NotImplementedError()
 
-    def kvs_set(self, pairs: Dict[str, str]) -> None:
+    def kvs_set(self, pairs: Mapping[str, str]) -> None:
         raise NotImplementedError()

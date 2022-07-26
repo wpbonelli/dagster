@@ -1,7 +1,7 @@
 import sys
 import time
 from abc import abstractmethod
-from typing import Dict
+from typing import Mapping
 
 import dagster._check as check
 from dagster._core.errors import DagsterRepositoryLocationLoadError
@@ -33,13 +33,13 @@ class BaseDaemonWorkspace(IWorkspace):
     def __enter__(self):
         return self
 
-    def get_workspace_snapshot(self) -> Dict[str, WorkspaceLocationEntry]:
+    def get_workspace_snapshot(self) -> Mapping[str, WorkspaceLocationEntry]:
         if self._location_entries == None:
             self._location_entries = self._load_workspace()
         return self._location_entries.copy()
 
     @abstractmethod
-    def _load_workspace(self) -> Dict[str, WorkspaceLocationEntry]:
+    def _load_workspace(self) -> Mapping[str, WorkspaceLocationEntry]:
         pass
 
     def get_workspace_copy_for_iteration(self):
@@ -98,7 +98,7 @@ class DaemonIterationWorkspace(BaseDaemonWorkspace):
         self._location_entries_copy = location_entries_copy
         super().__init__()
 
-    def _load_workspace(self) -> Dict[str, WorkspaceLocationEntry]:
+    def _load_workspace(self) -> Mapping[str, WorkspaceLocationEntry]:
         return self._location_entries_copy
 
 
@@ -116,7 +116,7 @@ class DaemonWorkspace(BaseDaemonWorkspace):
 
         super().__init__()
 
-    def _load_workspace(self) -> Dict[str, WorkspaceLocationEntry]:
+    def _load_workspace(self) -> Mapping[str, WorkspaceLocationEntry]:
         entries = {}
         origins = self._workspace_load_target.create_origins()
         for origin in origins:

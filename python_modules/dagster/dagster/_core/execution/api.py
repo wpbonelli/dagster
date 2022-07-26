@@ -5,7 +5,6 @@ from typing import (
     Dict,
     FrozenSet,
     Iterator,
-    List,
     Mapping,
     NamedTuple,
     Optional,
@@ -295,11 +294,11 @@ def execute_run(
 
 def execute_pipeline_iterator(
     pipeline: Union[PipelineDefinition, IPipeline],
-    run_config: Optional[dict] = None,
+    run_config: Optional[Mapping[str, object]] = None,
     mode: Optional[str] = None,
     preset: Optional[str] = None,
-    tags: Optional[Dict[str, Any]] = None,
-    solid_selection: Optional[List[str]] = None,
+    tags: Optional[Mapping[str, Any]] = None,
+    solid_selection: Optional[Sequence[str]] = None,
     instance: Optional[DagsterInstance] = None,
 ) -> Iterator[DagsterEvent]:
     """Execute a pipeline iteratively.
@@ -569,11 +568,11 @@ def execute_job(
 
 def execute_pipeline(
     pipeline: Union[PipelineDefinition, IPipeline],
-    run_config: Optional[dict] = None,
+    run_config: Optional[Mapping] = None,
     mode: Optional[str] = None,
     preset: Optional[str] = None,
-    tags: Optional[Dict[str, Any]] = None,
-    solid_selection: Optional[List[str]] = None,
+    tags: Optional[Mapping[str, Any]] = None,
+    solid_selection: Optional[Sequence[str]] = None,
     instance: Optional[DagsterInstance] = None,
     raise_on_error: bool = True,
 ) -> PipelineExecutionResult:
@@ -632,8 +631,8 @@ def _logged_execute_pipeline(
     run_config: Optional[dict] = None,
     mode: Optional[str] = None,
     preset: Optional[str] = None,
-    tags: Optional[Dict[str, Any]] = None,
-    solid_selection: Optional[List[str]] = None,
+    tags: Optional[Mapping[str, Any]] = None,
+    solid_selection: Optional[Sequence[str]] = None,
     raise_on_error: bool = True,
 ) -> PipelineExecutionResult:
     check.inst_param(instance, "instance", DagsterInstance)
@@ -678,11 +677,11 @@ def _logged_execute_pipeline(
 def reexecute_pipeline(
     pipeline: Union[IPipeline, PipelineDefinition],
     parent_run_id: str,
-    run_config: Optional[dict] = None,
-    step_selection: Optional[List[str]] = None,
+    run_config: Optional[Mapping] = None,
+    step_selection: Optional[Sequence[str]] = None,
     mode: Optional[str] = None,
     preset: Optional[str] = None,
-    tags: Optional[Dict[str, Any]] = None,
+    tags: Optional[Mapping[str, Any]] = None,
     instance: Optional[DagsterInstance] = None,
     raise_on_error: bool = True,
 ) -> PipelineExecutionResult:
@@ -724,7 +723,7 @@ def reexecute_pipeline(
     For the asynchronous version, see :py:func:`reexecute_pipeline_iterator`.
     """
 
-    check.opt_list_param(step_selection, "step_selection", of_type=str)
+    check.opt_sequence_param(step_selection, "step_selection", of_type=str)
 
     check.str_param(parent_run_id, "parent_run_id")
 
@@ -786,11 +785,11 @@ def reexecute_pipeline(
 def reexecute_pipeline_iterator(
     pipeline: Union[IPipeline, PipelineDefinition],
     parent_run_id: str,
-    run_config: Optional[dict] = None,
-    step_selection: Optional[List[str]] = None,
+    run_config: Optional[Mapping[str, object]] = None,
+    step_selection: Optional[Sequence[str]] = None,
     mode: Optional[str] = None,
     preset: Optional[str] = None,
-    tags: Optional[Dict[str, Any]] = None,
+    tags: Optional[Mapping[str, Any]] = None,
     instance: Optional[DagsterInstance] = None,
 ) -> Iterator[DagsterEvent]:
     """Reexecute a pipeline iteratively.
@@ -831,7 +830,7 @@ def reexecute_pipeline_iterator(
       Iterator[DagsterEvent]: The stream of events resulting from pipeline reexecution.
     """
 
-    check.opt_list_param(step_selection, "step_selection", of_type=str)
+    check.opt_sequence_param(step_selection, "step_selection", of_type=str)
 
     check.str_param(parent_run_id, "parent_run_id")
 
@@ -915,9 +914,9 @@ def execute_plan(
     pipeline: IPipeline,
     instance: DagsterInstance,
     pipeline_run: PipelineRun,
-    run_config: Optional[Dict] = None,
+    run_config: Optional[Mapping] = None,
     retry_mode: Optional[RetryMode] = None,
-) -> List[DagsterEvent]:
+) -> Sequence[DagsterEvent]:
     """This is the entry point of dagster-graphql executions. For the dagster CLI entry point, see
     execute_pipeline() above.
     """
@@ -925,7 +924,7 @@ def execute_plan(
     check.inst_param(pipeline, "pipeline", IPipeline)
     check.inst_param(instance, "instance", DagsterInstance)
     check.inst_param(pipeline_run, "pipeline_run", PipelineRun)
-    run_config = check.opt_dict_param(run_config, "run_config")
+    run_config = check.opt_mapping_param(run_config, "run_config")
     check.opt_inst_param(retry_mode, "retry_mode", RetryMode)
 
     return list(
@@ -980,19 +979,19 @@ def create_execution_plan(
     pipeline: Union[IPipeline, PipelineDefinition],
     run_config: Optional[Mapping[str, object]] = None,
     mode: Optional[str] = None,
-    step_keys_to_execute: Optional[List[str]] = None,
+    step_keys_to_execute: Optional[Sequence[str]] = None,
     known_state: Optional[KnownExecutionState] = None,
     instance_ref: Optional[InstanceRef] = None,
-    tags: Optional[Dict[str, str]] = None,
+    tags: Optional[Mapping[str, str]] = None,
 ) -> ExecutionPlan:
     pipeline = _check_pipeline(pipeline)
     pipeline_def = pipeline.get_definition()
     check.inst_param(pipeline_def, "pipeline_def", PipelineDefinition)
     run_config = check.opt_mapping_param(run_config, "run_config", key_type=str)
     mode = check.opt_str_param(mode, "mode", default=pipeline_def.get_default_mode_name())
-    check.opt_nullable_list_param(step_keys_to_execute, "step_keys_to_execute", of_type=str)
+    check.opt_nullable_sequence_param(step_keys_to_execute, "step_keys_to_execute", of_type=str)
     check.opt_inst_param(instance_ref, "instance_ref", InstanceRef)
-    tags = check.opt_dict_param(tags, "tags", key_type=str, value_type=str)
+    tags = check.opt_mapping_param(tags, "tags", key_type=str, value_type=str)
     known_state = check.opt_inst_param(
         known_state,
         "known_state",
@@ -1143,24 +1142,24 @@ class ExecuteRunWithPlanIterable:
 
 def _check_execute_pipeline_args(
     pipeline: Union[PipelineDefinition, IPipeline],
-    run_config: Optional[dict],
+    run_config: Optional[Mapping],
     mode: Optional[str],
     preset: Optional[str],
-    tags: Optional[Dict[str, Any]],
-    solid_selection: Optional[List[str]] = None,
+    tags: Optional[Mapping[str, Any]],
+    solid_selection: Optional[Sequence[str]] = None,
 ) -> Tuple[
     IPipeline,
-    Optional[dict],
+    Optional[Mapping],
     Optional[str],
-    Dict[str, Any],
+    Mapping[str, Any],
     Optional[FrozenSet[str]],
-    Optional[List[str]],
+    Optional[Sequence[str]],
 ]:
     pipeline = _check_pipeline(pipeline)
     pipeline_def = pipeline.get_definition()
     check.inst_param(pipeline_def, "pipeline_def", PipelineDefinition)
 
-    run_config = check.opt_dict_param(run_config, "run_config")
+    run_config = check.opt_mapping_param(run_config, "run_config")
     check.opt_str_param(mode, "mode")
     check.opt_str_param(preset, "preset")
     check.invariant(
@@ -1170,8 +1169,8 @@ def _check_execute_pipeline_args(
         ),
     )
 
-    tags = check.opt_dict_param(tags, "tags", key_type=str)
-    check.opt_list_param(solid_selection, "solid_selection", of_type=str)
+    tags = check.opt_mapping_param(tags, "tags", key_type=str)
+    check.opt_sequence_param(solid_selection, "solid_selection", of_type=str)
 
     if preset is not None:
         pipeline_preset = pipeline_def.get_preset(preset)
@@ -1251,9 +1250,9 @@ def _resolve_reexecute_step_selection(
     instance: DagsterInstance,
     pipeline: IPipeline,
     mode: Optional[str],
-    run_config: Optional[dict],
+    run_config: Optional[Mapping],
     parent_pipeline_run: DagsterRun,
-    step_selection: List[str],
+    step_selection: Sequence[str],
 ) -> ExecutionPlan:
     if parent_pipeline_run.solid_selection:
         pipeline = pipeline.subset_for_execution(parent_pipeline_run.solid_selection, None)

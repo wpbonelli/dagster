@@ -140,7 +140,7 @@ class EventRecordsFilter(
         [
             ("event_type", DagsterEventType),
             ("asset_key", Optional[AssetKey]),
-            ("asset_partitions", Optional[List[str]]),
+            ("asset_partitions", Optional[Sequence[str]]),
             ("after_cursor", Optional[Union[int, RunShardedEventsCursor]]),
             ("before_cursor", Optional[Union[int, RunShardedEventsCursor]]),
             ("after_timestamp", Optional[float]),
@@ -175,13 +175,13 @@ class EventRecordsFilter(
         cls,
         event_type: DagsterEventType,
         asset_key: Optional[AssetKey] = None,
-        asset_partitions: Optional[List[str]] = None,
+        asset_partitions: Optional[Sequence[str]] = None,
         after_cursor: Optional[Union[int, RunShardedEventsCursor]] = None,
         before_cursor: Optional[Union[int, RunShardedEventsCursor]] = None,
         after_timestamp: Optional[float] = None,
         before_timestamp: Optional[float] = None,
     ):
-        check.opt_list_param(asset_partitions, "asset_partitions", of_type=str)
+        check.opt_sequence_param(asset_partitions, "asset_partitions", of_type=str)
         check.inst_param(event_type, "event_type", DagsterEventType)
 
         # type-ignores work around mypy type inference bug
@@ -255,7 +255,9 @@ class EventLogStorage(ABC, MayHaveInstanceWeakref):
         """Get a summary of events that have ocurred in a run."""
         return build_run_stats_from_events(run_id, self.get_logs_for_run(run_id))
 
-    def get_step_stats_for_run(self, run_id: str, step_keys=None) -> List[RunStepKeyStatsSnapshot]:
+    def get_step_stats_for_run(
+        self, run_id: str, step_keys=None
+    ) -> Sequence[RunStepKeyStatsSnapshot]:
         """Get per-step stats for a pipeline run."""
         logs = self.get_logs_for_run(run_id)
         if step_keys:
@@ -357,7 +359,7 @@ class EventLogStorage(ABC, MayHaveInstanceWeakref):
 
     def get_asset_keys(
         self,
-        prefix: Optional[List[str]] = None,
+        prefix: Optional[Sequence[str]] = None,
         limit: Optional[int] = None,
         cursor: Optional[str] = None,
     ) -> Iterable[AssetKey]:

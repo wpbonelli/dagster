@@ -7,11 +7,11 @@ from typing import (
     Any,
     Dict,
     Generator,
-    List,
     Mapping,
     NamedTuple,
     NoReturn,
     Optional,
+    Sequence,
     Set,
     Type,
     cast,
@@ -99,7 +99,7 @@ class RepositoryLocationOrigin(ABC, tuple):
         raise NotImplementedError
 
     @abstractmethod
-    def get_display_metadata(self) -> Dict[str, Any]:
+    def get_display_metadata(self) -> Mapping[str, Any]:
         pass
 
     def get_id(self) -> str:
@@ -132,7 +132,7 @@ class RegisteredRepositoryLocationOrigin(
     def __new__(cls, location_name: str):
         return super(RegisteredRepositoryLocationOrigin, cls).__new__(cls, location_name)
 
-    def get_display_metadata(self) -> Dict[str, Any]:
+    def get_display_metadata(self) -> Mapping[str, Any]:
         return {}
 
     def create_location(self) -> NoReturn:
@@ -149,8 +149,8 @@ class InProcessRepositoryLocationOrigin(
         [
             ("loadable_target_origin", LoadableTargetOrigin),
             ("container_image", Optional[str]),
-            ("entry_point", List[str]),
-            ("container_context", Optional[Dict[str, Any]]),
+            ("entry_point", Sequence[str]),
+            ("container_context", Optional[Mapping[str, Any]]),
         ],
     ),
     RepositoryLocationOrigin,
@@ -164,7 +164,7 @@ class InProcessRepositoryLocationOrigin(
         cls,
         loadable_target_origin: LoadableTargetOrigin,
         container_image: Optional[str] = None,
-        entry_point: Optional[List[str]] = None,
+        entry_point: Optional[Sequence[str]] = None,
         container_context=None,
     ):
         return super(InProcessRepositoryLocationOrigin, cls).__new__(
@@ -174,7 +174,7 @@ class InProcessRepositoryLocationOrigin(
             ),
             container_image=check.opt_str_param(container_image, "container_image"),
             entry_point=(
-                check.opt_list_param(entry_point, "entry_point")
+                check.opt_sequence_param(entry_point, "entry_point")
                 if entry_point
                 else DEFAULT_DAGSTER_ENTRY_POINT
             ),
@@ -189,7 +189,7 @@ class InProcessRepositoryLocationOrigin(
     def is_reload_supported(self) -> bool:
         return False
 
-    def get_display_metadata(self) -> Dict[str, Any]:
+    def get_display_metadata(self) -> Mapping[str, Any]:
         return {}
 
     def create_location(self) -> "InProcessRepositoryLocation":
@@ -225,7 +225,7 @@ class ManagedGrpcPythonEnvRepositoryLocationOrigin(
             else _assign_loadable_target_origin_name(loadable_target_origin),
         )
 
-    def get_display_metadata(self) -> Dict[str, str]:
+    def get_display_metadata(self) -> Mapping[str, str]:
         metadata = {
             "python_file": self.loadable_target_origin.python_file,
             "module_name": self.loadable_target_origin.module_name,
@@ -313,7 +313,7 @@ class GrpcServerRepositoryLocationOrigin(
             use_ssl if check.opt_bool_param(use_ssl, "use_ssl") else None,
         )
 
-    def get_display_metadata(self) -> Dict[str, str]:
+    def get_display_metadata(self) -> Mapping[str, str]:
         metadata = {
             "host": self.host,
             "port": str(self.port) if self.port else None,

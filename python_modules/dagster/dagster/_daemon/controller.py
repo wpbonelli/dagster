@@ -134,7 +134,7 @@ class DagsterDaemonController:
         self._instance = check.inst_param(instance, "instance", DagsterInstance)
         self._daemons = {
             daemon.daemon_type(): daemon
-            for daemon in check.list_param(daemons, "daemons", of_type=DagsterDaemon)
+            for daemon in check.sequence_param(daemons, "daemons", of_type=DagsterDaemon)
         }
 
         check.callable_param(context_fn, "context_fn")

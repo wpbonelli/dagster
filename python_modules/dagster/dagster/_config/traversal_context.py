@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict
+from typing import Mapping
 
 import dagster._check as check
 
@@ -122,7 +122,7 @@ class TraversalContext(ContextData):
         config_type: ConfigType,
         stack: EvaluationStack,
         traversal_type: TraversalType,
-        all_config_types: Dict[str, ConfigType],
+        all_config_types: Mapping[str, ConfigType],
     ):
         super(TraversalContext, self).__init__(
             config_schema_snapshot=config_schema_snapshot,
@@ -131,7 +131,7 @@ class TraversalContext(ContextData):
         )
         self._config_type = check.inst_param(config_type, "config_type", ConfigType)
         self._traversal_type = check.inst_param(traversal_type, "traversal_type", TraversalType)
-        self._all_config_types = check.dict_param(
+        self._all_config_types = check.mapping_param(
             all_config_types, "all_config_types", key_type=str, value_type=ConfigType
         )
 
@@ -151,7 +151,7 @@ class TraversalContext(ContextData):
         )
 
     @property
-    def all_config_types(self) -> Dict[str, ConfigType]:
+    def all_config_types(self) -> Mapping[str, ConfigType]:
         return self._all_config_types
 
     @property

@@ -5,7 +5,7 @@ import threading
 import time
 from collections import defaultdict
 from contextlib import ExitStack
-from typing import Dict, NamedTuple, Optional
+from typing import Mapping, NamedTuple, Optional
 
 import pendulum
 
@@ -688,7 +688,7 @@ def _get_or_create_sensor_run(
     external_pipeline,
     run_request,
     target_data,
-    existing_runs_by_key: Dict[str, PipelineRun],
+    existing_runs_by_key: Mapping[str, PipelineRun],
 ):
 
     if not run_request.run_key:

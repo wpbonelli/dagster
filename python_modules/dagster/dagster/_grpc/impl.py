@@ -2,7 +2,7 @@
 
 import os
 import sys
-from typing import Generator, List, Optional
+from typing import Generator, Optional, Sequence
 
 import pendulum
 
@@ -211,12 +211,12 @@ def start_run_in_subprocess(
 
 def get_external_pipeline_subset_result(
     recon_pipeline: ReconstructablePipeline,
-    solid_selection: Optional[List[str]],
-    asset_selection: Optional[List[AssetKey]],
+    solid_selection: Optional[Sequence[str]],
+    asset_selection: Optional[Sequence[AssetKey]],
 ):
     check.inst_param(recon_pipeline, "recon_pipeline", ReconstructablePipeline)
-    check.opt_list_param(solid_selection, "solid_selection", str)
-    check.opt_list_param(asset_selection, "asset_selection", AssetKey)
+    check.opt_sequence_param(solid_selection, "solid_selection", str)
+    check.opt_sequence_param(asset_selection, "asset_selection", AssetKey)
     if solid_selection or asset_selection:
         try:
             sub_pipeline = recon_pipeline.subset_for_execution(

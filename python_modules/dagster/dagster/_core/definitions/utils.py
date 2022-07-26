@@ -2,7 +2,7 @@ import keyword
 import os
 import re
 from glob import glob
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from typing import Any, Mapping, Optional, Sequence, Tuple
 
 import pkg_resources
 import yaml
@@ -89,7 +89,7 @@ def struct_to_string(name: str, **kwargs: object) -> str:
 
 def validate_tags(tags: Optional[Mapping[str, Any]], allow_reserved_tags=True) -> frozentags:
     valid_tags = {}
-    for key, value in check.opt_dict_param(tags, "tags", key_type=str).items():
+    for key, value in check.opt_mapping_param(tags, "tags", key_type=str).items():
         if not isinstance(value, str):
             valid = False
             err_reason = 'Could not JSON encode value "{}"'.format(value)
@@ -130,7 +130,7 @@ def validate_group_name(group_name: Optional[str]) -> str:
     return DEFAULT_GROUP_NAME
 
 
-def config_from_files(config_files: List[str]) -> Dict[str, Any]:
+def config_from_files(config_files: Sequence[str]) -> Mapping[str, Any]:
     """Constructs run config from YAML files.
 
     Args:
@@ -145,7 +145,7 @@ def config_from_files(config_files: List[str]) -> Dict[str, Any]:
         DagsterInvariantViolationError: When one of the YAML files is invalid and has a parse
             error.
     """
-    config_files = check.opt_list_param(config_files, "config_files")
+    config_files = check.opt_sequence_param(config_files, "config_files")
 
     filenames = []
     for file_glob in config_files or []:
@@ -169,7 +169,7 @@ def config_from_files(config_files: List[str]) -> Dict[str, Any]:
     return run_config
 
 
-def config_from_yaml_strings(yaml_strings: List[str]) -> Dict[str, Any]:
+def config_from_yaml_strings(yaml_strings: Sequence[str]) -> Mapping[str, Any]:
     """Static constructor for run configs from YAML strings.
 
     Args:
@@ -182,7 +182,7 @@ def config_from_yaml_strings(yaml_strings: List[str]) -> Dict[str, Any]:
         DagsterInvariantViolationError: When one of the YAML documents is invalid and has a
             parse error.
     """
-    yaml_strings = check.list_param(yaml_strings, "yaml_strings", of_type=str)
+    yaml_strings = check.sequence_param(yaml_strings, "yaml_strings", of_type=str)
 
     try:
         run_config = merge_yaml_strings(yaml_strings)
@@ -194,7 +194,7 @@ def config_from_yaml_strings(yaml_strings: List[str]) -> Dict[str, Any]:
     return run_config
 
 
-def config_from_pkg_resources(pkg_resource_defs: List[Tuple[str, str]]) -> Dict[str, Any]:
+def config_from_pkg_resources(pkg_resource_defs: Sequence[Tuple[str, str]]) -> Mapping[str, Any]:
     """Load a run config from a package resource, using :py:func:`pkg_resources.resource_string`.
 
     Example:
@@ -220,7 +220,7 @@ def config_from_pkg_resources(pkg_resource_defs: List[Tuple[str, str]]) -> Dict[
         DagsterInvariantViolationError: When one of the YAML documents is invalid and has a
             parse error.
     """
-    pkg_resource_defs = check.list_param(pkg_resource_defs, "pkg_resource_defs", of_type=tuple)
+    pkg_resource_defs = check.sequence_param(pkg_resource_defs, "pkg_resource_defs", of_type=tuple)
 
     try:
         yaml_strings = [

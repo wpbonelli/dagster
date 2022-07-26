@@ -1,6 +1,6 @@
 import inspect
 from types import ModuleType
-from typing import Callable, List, NamedTuple, Optional, Sequence, Type
+from typing import Callable, NamedTuple, Optional, Sequence, Type
 
 from dagster import (
     DagsterInvariantViolationError,
@@ -30,7 +30,7 @@ def loadable_targets_from_python_file(
 def loadable_targets_from_python_module(
     module_name: str,
     working_directory: Optional[str],
-    remove_from_path_fn: Callable[[], List[str]] = None,
+    remove_from_path_fn: Callable[[], Sequence[str]] = None,
 ) -> Sequence[LoadableTarget]:
     module = load_python_module(
         module_name,
@@ -43,7 +43,7 @@ def loadable_targets_from_python_module(
 def loadable_targets_from_python_package(
     package_name: str,
     working_directory: Optional[str],
-    remove_from_path_fn: Callable[[], List[str]] = None,
+    remove_from_path_fn: Callable[[], Sequence[str]] = None,
 ) -> Sequence[LoadableTarget]:
     module = load_python_module(
         package_name, working_directory, remove_from_path_fn=remove_from_path_fn

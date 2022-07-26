@@ -5,7 +5,7 @@ import warnings
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from contextlib import ExitStack
-from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Sequence, Union, cast
 
 import dagster._check as check
 from dagster._core.errors import (
@@ -72,7 +72,7 @@ class BaseWorkspaceRequestContext(IWorkspace):
         pass
 
     @abstractmethod
-    def get_workspace_snapshot(self) -> Dict[str, WorkspaceLocationEntry]:
+    def get_workspace_snapshot(self) -> Mapping[str, WorkspaceLocationEntry]:
         pass
 
     @abstractmethod
@@ -91,7 +91,7 @@ class BaseWorkspaceRequestContext(IWorkspace):
 
     @property
     @abstractmethod
-    def permissions(self) -> Dict[str, PermissionResult]:
+    def permissions(self) -> Mapping[str, PermissionResult]:
         pass
 
     @abstractmethod
@@ -124,7 +124,7 @@ class BaseWorkspaceRequestContext(IWorkspace):
         )
 
     @property
-    def repository_locations(self) -> List[RepositoryLocation]:
+    def repository_locations(self) -> Sequence[RepositoryLocation]:
         return [
             entry.repository_location
             for entry in self.get_workspace_snapshot().values()
@@ -132,10 +132,10 @@ class BaseWorkspaceRequestContext(IWorkspace):
         ]
 
     @property
-    def repository_location_names(self) -> List[str]:
+    def repository_location_names(self) -> Sequence[str]:
         return list(self.get_workspace_snapshot())
 
-    def repository_location_errors(self) -> List[SerializableErrorInfo]:
+    def repository_location_errors(self) -> Sequence[SerializableErrorInfo]:
         return [
             entry.load_error for entry in self.get_workspace_snapshot().values() if entry.load_error
         ]
@@ -197,7 +197,7 @@ class BaseWorkspaceRequestContext(IWorkspace):
         external_pipeline: ExternalPipeline,
         run_config: dict,
         mode: str,
-        step_keys_to_execute: List[str],
+        step_keys_to_execute: Sequence[str],
         known_state: KnownExecutionState,
     ) -> ExternalExecutionPlan:
         return self.get_repository_location(
@@ -244,7 +244,7 @@ class BaseWorkspaceRequestContext(IWorkspace):
         self,
         repository_handle: RepositoryHandle,
         partition_set_name: str,
-        partition_names: List[str],
+        partition_names: Sequence[str],
     ) -> Union["ExternalPartitionSetExecutionParamData", "ExternalPartitionExecutionErrorData"]:
         return self.get_repository_location(
             repository_handle.location_name
@@ -265,7 +265,7 @@ class WorkspaceRequestContext(BaseWorkspaceRequestContext):
     def __init__(
         self,
         instance: DagsterInstance,
-        workspace_snapshot: Dict[str, WorkspaceLocationEntry],
+        workspace_snapshot: Mapping[str, WorkspaceLocationEntry],
         process_context: "WorkspaceProcessContext",
         version: Optional[str],
         source: Optional[object],
@@ -280,7 +280,7 @@ class WorkspaceRequestContext(BaseWorkspaceRequestContext):
     def instance(self) -> DagsterInstance:
         return self._instance
 
-    def get_workspace_snapshot(self) -> Dict[str, WorkspaceLocationEntry]:
+    def get_workspace_snapshot(self) -> Mapping[str, WorkspaceLocationEntry]:
         return self._workspace_snapshot
 
     def get_location_entry(self, name) -> Optional[WorkspaceLocationEntry]:
@@ -299,7 +299,7 @@ class WorkspaceRequestContext(BaseWorkspaceRequestContext):
         return self._process_context.read_only
 
     @property
-    def permissions(self) -> Dict[str, PermissionResult]:
+    def permissions(self) -> Mapping[str, PermissionResult]:
         return self._process_context.permissions
 
     def has_permission(self, permission: str) -> bool:
@@ -505,7 +505,7 @@ class WorkspaceProcessContext(IWorkspaceProcessContext):
         return self._read_only
 
     @property
-    def permissions(self) -> Dict[str, PermissionResult]:
+    def permissions(self) -> Mapping[str, PermissionResult]:
         return get_user_permissions(self)
 
     @property

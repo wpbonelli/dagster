@@ -8,7 +8,6 @@ from typing import (
     Dict,
     FrozenSet,
     Iterable,
-    List,
     Mapping,
     MutableSet,
     NamedTuple,
@@ -40,7 +39,7 @@ class OpSelectionData(
     NamedTuple(
         "_OpSelectionData",
         [
-            ("op_selection", List[str]),
+            ("op_selection", Sequence[str]),
             ("resolved_op_selection", AbstractSet[str]),
             ("parent_job_def", "JobDefinition"),
         ],
@@ -57,7 +56,7 @@ class OpSelectionData(
 
     def __new__(
         cls,
-        op_selection: List[str],
+        op_selection: Sequence[str],
         resolved_op_selection: AbstractSet[str],
         parent_job_def: "JobDefinition",
     ):
@@ -65,7 +64,7 @@ class OpSelectionData(
 
         return super(OpSelectionData, cls).__new__(
             cls,
-            op_selection=check.list_param(op_selection, "op_selection", str),
+            op_selection=check.sequence_param(op_selection, "op_selection", str),
             resolved_op_selection=check.set_param(
                 resolved_op_selection, "resolved_op_selection", str
             ),
@@ -287,7 +286,7 @@ def parse_clause(clause: str) -> Optional[Tuple[int, str, int]]:
     return (up_depth, item_name, down_depth)
 
 
-def parse_items_from_selection(selection: List[str]) -> List[str]:
+def parse_items_from_selection(selection: Sequence[str]) -> Sequence[str]:
     items = []
     for clause in selection:
         parts = parse_clause(clause)
@@ -298,7 +297,7 @@ def parse_items_from_selection(selection: List[str]) -> List[str]:
     return items
 
 
-def clause_to_subset(graph: DependencyGraph, clause: str) -> List[str]:
+def clause_to_subset(graph: DependencyGraph, clause: str) -> Sequence[str]:
     """Take a selection query and return a list of the selected and qualified items.
 
     Args:
@@ -335,7 +334,9 @@ class LeafNodeSelection:
     """Marker for no further nesting selection needed."""
 
 
-def convert_dot_seperated_string_to_dict(tree: Dict[str, Any], splits: List[str]) -> Dict[str, Any]:
+def convert_dot_seperated_string_to_dict(
+    tree: Dict[str, Any], splits: Sequence[str]
+) -> Mapping[str, Any]:
     # For example:
     # "subgraph.subsubgraph.return_one" => {"subgraph": {"subsubgraph": {"return_one": None}}}
     key = splits[0]
@@ -348,7 +349,7 @@ def convert_dot_seperated_string_to_dict(tree: Dict[str, Any], splits: List[str]
     return tree
 
 
-def parse_op_selection(job_def: "JobDefinition", op_selection: List[str]) -> Dict[str, Any]:
+def parse_op_selection(job_def: "JobDefinition", op_selection: Sequence[str]) -> Mapping[str, Any]:
     """
     Examples:
         ["subgraph.return_one", "subgraph.adder", "subgraph.add_one", "add_one"]
@@ -373,7 +374,7 @@ def parse_op_selection(job_def: "JobDefinition", op_selection: List[str]) -> Dic
 
 
 def parse_solid_selection(
-    pipeline_def: "PipelineDefinition", solid_selection: List[str]
+    pipeline_def: "PipelineDefinition", solid_selection: Sequence[str]
 ) -> FrozenSet[str]:
     """Take pipeline definition and a list of solid selection queries (inlcuding names of solid
         invocations. See syntax examples below) and return a set of the qualified solid names.
@@ -401,14 +402,14 @@ def parse_solid_selection(
         FrozenSet[str]: a frozenset of qualified deduplicated solid names, empty if no qualified
             subset selected.
     """
-    check.list_param(solid_selection, "solid_selection", of_type=str)
+    check.sequence_param(solid_selection, "solid_selection", of_type=str)
 
     # special case: select all
     if len(solid_selection) == 1 and solid_selection[0] == "*":
         return frozenset(pipeline_def.graph.node_names())
 
     graph = generate_dep_graph(pipeline_def)
-    solids_set = set()
+    solids_set: Set[str] = set()
 
     # loop over clauses
     for clause in solid_selection:
@@ -427,7 +428,7 @@ def parse_solid_selection(
 
 
 def parse_step_selection(
-    step_deps: Dict[str, Set[str]], step_selection: List[str]
+    step_deps: Mapping[str, Set[str]], step_selection: Sequence[str]
 ) -> FrozenSet[str]:
     """Take the dependency dictionary generated while building execution plan and a list of step key
      selection queries and return a set of the qualified step keys.
@@ -444,7 +445,7 @@ def parse_step_selection(
         FrozenSet[str]: a frozenset of qualified deduplicated solid names, empty if no qualified
             subset selected.
     """
-    check.list_param(step_selection, "step_selection", of_type=str)
+    check.sequence_param(step_selection, "step_selection", of_type=str)
     # reverse step_deps to get the downstream_deps
     # make sure we have all items as keys, including the ones without downstream dependencies
     downstream_deps: Dict[str, MutableSet[str]] = defaultdict(
@@ -456,7 +457,7 @@ def parse_step_selection(
 
     # generate dep graph
     graph = freeze_graph({"upstream": step_deps, "downstream": downstream_deps})
-    steps_set = set()
+    steps_set: Set[str] = set()
 
     step_keys = parse_items_from_selection(step_selection)
     invalid_keys = [key for key in step_keys if key not in step_deps]
@@ -496,7 +497,7 @@ def parse_asset_selection(
         FrozenSet[str]: a frozenset of qualified deduplicated asset keys, empty if no qualified
             subset selected.
     """
-    check.list_param(asset_selection, "asset_selection", of_type=str)
+    check.sequence_param(asset_selection, "asset_selection", of_type=str)
 
     # special case: select *
     if len(asset_selection) == 1 and asset_selection[0] == "*":

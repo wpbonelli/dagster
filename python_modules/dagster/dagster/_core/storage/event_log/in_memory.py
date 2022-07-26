@@ -315,7 +315,7 @@ class InMemoryEventLogStorage(EventLogStorage, ConfigurableClass):
     def get_latest_materialization_events(
         self, asset_keys: Sequence[AssetKey]
     ) -> Mapping[AssetKey, Optional[EventLogEntry]]:
-        check.list_param(asset_keys, "asset_keys", of_type=AssetKey)
+        check.sequence_param(asset_keys, "asset_keys", of_type=AssetKey)
 
         asset_records = []
         for records in self._logs.values():
@@ -361,7 +361,7 @@ class InMemoryEventLogStorage(EventLogStorage, ConfigurableClass):
     def get_materialization_count_by_partition(
         self, asset_keys: Sequence[AssetKey]
     ) -> Mapping[AssetKey, Mapping[str, int]]:
-        check.list_param(asset_keys, "asset_keys", of_type=AssetKey)
+        check.sequence_param(asset_keys, "asset_keys", of_type=AssetKey)
 
         materialization_count_by_key_partition: Dict[AssetKey, Dict[str, int]] = {}
         for records in self._logs.values():

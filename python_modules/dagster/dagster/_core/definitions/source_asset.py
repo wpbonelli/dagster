@@ -1,4 +1,4 @@
-from typing import Dict, Iterator, Mapping, NamedTuple, Optional, Sequence, Union, cast
+from typing import Iterator, Mapping, NamedTuple, Optional, Sequence, Union, cast
 
 import dagster._check as check
 from dagster._annotations import PublicAttr, public
@@ -39,7 +39,7 @@ class SourceAsset(
             ("description", PublicAttr[Optional[str]]),
             ("partitions_def", PublicAttr[Optional[PartitionsDefinition]]),
             ("group_name", PublicAttr[str]),
-            ("resource_defs", PublicAttr[Dict[str, ResourceDefinition]]),
+            ("resource_defs", PublicAttr[Mapping[str, ResourceDefinition]]),
         ],
     ),
     ResourceAddable,

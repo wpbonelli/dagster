@@ -193,7 +193,7 @@ class ExternalPipelineData(
             parent_pipeline_snapshot=check.opt_inst_param(
                 parent_pipeline_snapshot, "parent_pipeline_snapshot", PipelineSnapshot
             ),
-            active_presets=check.list_param(
+            active_presets=check.sequence_param(
                 active_presets, "active_presets", of_type=ExternalPresetData
             ),
             is_job=check.bool_param(is_job, "is_job"),
@@ -229,7 +229,7 @@ class ExternalPresetData(
                 solid_selection, "solid_selection", of_type=str
             ),
             mode=check.str_param(mode, "mode"),
-            tags=check.opt_dict_param(tags, "tags", key_type=str, value_type=str),
+            tags=check.opt_mapping_param(tags, "tags", key_type=str, value_type=str),
         )
 
 
@@ -392,7 +392,9 @@ class ExternalSensorData(
             mode=check.opt_str_param(mode, "mode"),  # keep legacy field populated
             min_interval=check.opt_int_param(min_interval, "min_interval"),
             description=check.opt_str_param(description, "description"),
-            target_dict=check.opt_dict_param(target_dict, "target_dict", str, ExternalTargetData),
+            target_dict=check.opt_mapping_param(
+                target_dict, "target_dict", str, ExternalTargetData
+            ),
             metadata=check.opt_inst_param(metadata, "metadata", ExternalSensorMetadata),
             default_status=DefaultSensorStatus.RUNNING
             if default_status == DefaultSensorStatus.RUNNING
@@ -518,7 +520,7 @@ class ExternalStaticPartitionsDefinitionData(
 ):
     def __new__(cls, partition_keys: Sequence[str]):
         return super(ExternalStaticPartitionsDefinitionData, cls).__new__(
-            cls, partition_keys=check.list_param(partition_keys, "partition_keys", str)
+            cls, partition_keys=check.sequence_param(partition_keys, "partition_keys", str)
         )
 
     def get_partitions_definition(self):
@@ -562,7 +564,7 @@ class ExternalPartitionNamesData(
     def __new__(cls, partition_names: Optional[Sequence[str]] = None):
         return super(ExternalPartitionNamesData, cls).__new__(
             cls,
-            partition_names=check.opt_list_param(partition_names, "partition_names", str),
+            partition_names=check.opt_sequence_param(partition_names, "partition_names", str),
         )
 
 
@@ -618,7 +620,7 @@ class ExternalPartitionSetExecutionParamData(
     def __new__(cls, partition_data: Sequence[ExternalPartitionExecutionParamData]):
         return super(ExternalPartitionSetExecutionParamData, cls).__new__(
             cls,
-            partition_data=check.list_param(
+            partition_data=check.sequence_param(
                 partition_data, "partition_data", of_type=ExternalPartitionExecutionParamData
             ),
         )
@@ -757,7 +759,7 @@ class ExternalAssetNode(
             ),
             compute_kind=check.opt_str_param(compute_kind, "compute_kind"),
             op_name=check.opt_str_param(op_name, "op_name"),
-            op_names=check.opt_list_param(op_names, "op_names"),
+            op_names=check.opt_sequence_param(op_names, "op_names"),
             node_definition_name=check.opt_str_param(node_definition_name, "node_definition_name"),
             graph_name=check.opt_str_param(graph_name, "graph_name"),
             op_description=check.opt_str_param(

@@ -170,7 +170,7 @@ class ExternalRepository:
             pipeline_index=self.get_pipeline_index(job_name),
         )
 
-    def get_external_jobs(self) -> List["ExternalPipeline"]:
+    def get_external_jobs(self) -> Sequence["ExternalPipeline"]:
         return [self.get_external_job(pn) for pn in self._job_index_map]
 
     @property
