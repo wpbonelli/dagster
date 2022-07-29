@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Mapping
 
 import sqlalchemy as db
 from packaging.version import parse
@@ -174,8 +174,8 @@ class MySQLRunStorage(SqlRunStorage, ConfigurableClass):
                 )
             )
 
-    def kvs_set(self, pairs: Dict[str, str]) -> None:
-        check.dict_param(pairs, "pairs", key_type=str, value_type=str)
+    def kvs_set(self, pairs: Mapping[str, str]) -> None:
+        check.mapping_param(pairs, "pairs", key_type=str, value_type=str)
         db_values = [{"key": k, "value": v} for k, v in pairs.items()]
 
         with self.connect() as conn:

@@ -1,7 +1,7 @@
 import logging
 import sys
 import time
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Mapping, Optional, cast
 
 import requests
 from dagster_airbyte.types import AirbyteOutput
@@ -55,8 +55,8 @@ class AirbyteResource:
         )
 
     def make_request(
-        self, endpoint: str, data: Optional[Dict[str, object]]
-    ) -> Optional[Dict[str, object]]:
+        self, endpoint: str, data: Optional[Mapping[str, object]]
+    ) -> Optional[Mapping[str, object]]:
         """
         Creates and sends a request to the desired Airbyte REST API endpoint.
 
@@ -96,15 +96,15 @@ class AirbyteResource:
     def cancel_job(self, job_id: int):
         self.make_request(endpoint="/jobs/cancel", data={"id": job_id})
 
-    def get_job_status(self, job_id: int) -> dict:
+    def get_job_status(self, job_id: int) -> Mapping:
         return check.not_none(self.make_request(endpoint="/jobs/get", data={"id": job_id}))
 
-    def start_sync(self, connection_id: str) -> Dict[str, object]:
+    def start_sync(self, connection_id: str) -> Mapping[str, object]:
         return check.not_none(
             self.make_request(endpoint="/connections/sync", data={"connectionId": connection_id})
         )
 
-    def get_connection_details(self, connection_id: str) -> Dict[str, object]:
+    def get_connection_details(self, connection_id: str) -> Mapping[str, object]:
         return check.not_none(
             self.make_request(endpoint="/connections/get", data={"connectionId": connection_id})
         )

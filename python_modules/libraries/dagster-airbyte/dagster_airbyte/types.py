@@ -1,12 +1,12 @@
-from typing import Any, Dict, NamedTuple
+from typing import Any, Mapping, NamedTuple
 
 
 class AirbyteOutput(
     NamedTuple(
         "_AirbyteOutput",
         [
-            ("job_details", Dict[str, Any]),
-            ("connection_details", Dict[str, Any]),
+            ("job_details", Mapping[str, Any]),
+            ("connection_details", Mapping[str, Any]),
         ],
     )
 ):

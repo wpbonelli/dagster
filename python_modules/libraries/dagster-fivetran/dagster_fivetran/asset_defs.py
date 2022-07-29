@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional, Sequence
 
 from dagster_fivetran.resources import DEFAULT_POLL_INTERVAL
 from dagster_fivetran.utils import generate_materializations
@@ -12,12 +12,12 @@ from dagster._annotations import experimental
 @experimental
 def build_fivetran_assets(
     connector_id: str,
-    destination_tables: List[str],
+    destination_tables: Sequence[str],
     poll_interval: float = DEFAULT_POLL_INTERVAL,
     poll_timeout: Optional[float] = None,
     io_manager_key: Optional[str] = None,
-    asset_key_prefix: Optional[List[str]] = None,
-) -> List[AssetsDefinition]:
+    asset_key_prefix: Optional[Sequence[str]] = None,
+) -> Sequence[AssetsDefinition]:
 
     """
     Build a set of assets for a given Fivetran connector.
@@ -70,10 +70,10 @@ def build_fivetran_assets(
 
     """
 
-    asset_key_prefix = check.opt_list_param(asset_key_prefix, "asset_key_prefix", of_type=str)
+    asset_key_prefix = check.opt_sequence_param(asset_key_prefix, "asset_key_prefix", of_type=str)
 
     tracked_asset_keys = {
-        AssetKey(asset_key_prefix + table.split(".")) for table in destination_tables
+        AssetKey([*asset_key_prefix, *table.split(".")]) for table in destination_tables
     }
 
     @multi_asset(

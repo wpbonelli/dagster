@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, TypeVar, Union
 
 from slack_sdk.web.client import WebClient
 
@@ -18,9 +18,9 @@ T = TypeVar("T", bound=RunStatusSensorContext)
 def _build_slack_blocks_and_text(
     context: T,
     text_fn: Callable[[T], str],
-    blocks_fn: Optional[Callable[[T], List[Dict]]],
+    blocks_fn: Optional[Callable[[T], Sequence[Dict]]],
     dagit_base_url: Optional[str],
-) -> Tuple[List[Dict[str, Any]], str]:
+) -> Tuple[Sequence[Dict[str, Any]], str]:
     main_body_text = text_fn(context)
     blocks: List[Dict[str, Any]] = []
     if blocks_fn:
@@ -66,14 +66,14 @@ def make_slack_on_run_failure_sensor(
     channel: str,
     slack_token: str,
     text_fn: Callable[[RunFailureSensorContext], str] = _default_failure_message_text_fn,
-    blocks_fn: Optional[Callable[[RunFailureSensorContext], List[Dict]]] = None,
+    blocks_fn: Optional[Callable[[RunFailureSensorContext], Sequence[Dict]]] = None,
     name: Optional[str] = None,
     dagit_base_url: Optional[str] = None,
     monitored_jobs: Optional[
         List[Union[PipelineDefinition, GraphDefinition, UnresolvedAssetJobDefinition]]
     ] = None,
     job_selection: Optional[
-        List[Union[PipelineDefinition, GraphDefinition, UnresolvedAssetJobDefinition]]
+        Sequence[Union[PipelineDefinition, GraphDefinition, UnresolvedAssetJobDefinition]]
     ] = None,
     default_status: DefaultSensorStatus = DefaultSensorStatus.STOPPED,
 ):

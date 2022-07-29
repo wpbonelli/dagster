@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Mapping, Optional, Sequence, Set
 
 import dagster._check as check
 from dagster import Permissive, resource
@@ -24,7 +24,7 @@ class DbtCliResource(DbtResource):
     def __init__(
         self,
         executable: str,
-        default_flags: Dict[str, Any],
+        default_flags: Mapping[str, Any],
         warn_error: bool,
         ignore_handled_error: bool,
         target_path: str,
@@ -44,7 +44,7 @@ class DbtCliResource(DbtResource):
         super().__init__(logger)
 
     @property
-    def default_flags(self) -> Dict[str, Any]:
+    def default_flags(self) -> Mapping[str, Any]:
         """
         A set of params populated from resource config that are passed as flags to each dbt CLI command.
         """
@@ -99,7 +99,10 @@ class DbtCliResource(DbtResource):
         )
 
     def compile(
-        self, models: Optional[List[str]] = None, exclude: Optional[List[str]] = None, **kwargs
+        self,
+        models: Optional[Sequence[str]] = None,
+        exclude: Optional[Sequence[str]] = None,
+        **kwargs,
     ) -> DbtCliOutput:
         """
         Run the ``compile`` command on a dbt project. kwargs are passed in as additional parameters.
@@ -115,7 +118,10 @@ class DbtCliResource(DbtResource):
         return self.cli("compile", models=models, exclude=exclude, **kwargs)
 
     def run(
-        self, models: Optional[List[str]] = None, exclude: Optional[List[str]] = None, **kwargs
+        self,
+        models: Optional[Sequence[str]] = None,
+        exclude: Optional[Sequence[str]] = None,
+        **kwargs,
     ) -> DbtCliOutput:
         """
         Run the ``run`` command on a dbt project. kwargs are passed in as additional parameters.
@@ -131,7 +137,10 @@ class DbtCliResource(DbtResource):
         return self.cli("run", models=models, exclude=exclude, **kwargs)
 
     def snapshot(
-        self, select: Optional[List[str]] = None, exclude: Optional[List[str]] = None, **kwargs
+        self,
+        select: Optional[Sequence[str]] = None,
+        exclude: Optional[Sequence[str]] = None,
+        **kwargs,
     ) -> DbtCliOutput:
         """
         Run the ``snapshot`` command on a dbt project. kwargs are passed in as additional parameters.
@@ -148,8 +157,8 @@ class DbtCliResource(DbtResource):
 
     def test(
         self,
-        models: Optional[List[str]] = None,
-        exclude: Optional[List[str]] = None,
+        models: Optional[Sequence[str]] = None,
+        exclude: Optional[Sequence[str]] = None,
         data: bool = True,
         schema: bool = True,
         **kwargs,
@@ -177,8 +186,8 @@ class DbtCliResource(DbtResource):
     def seed(
         self,
         show: bool = False,
-        select: Optional[List[str]] = None,
-        exclude: Optional[List[str]] = None,
+        select: Optional[Sequence[str]] = None,
+        exclude: Optional[Sequence[str]] = None,
         **kwargs,
     ) -> DbtCliOutput:
         """
@@ -198,9 +207,9 @@ class DbtCliResource(DbtResource):
 
     def ls(
         self,
-        select: Optional[List[str]] = None,
-        models: Optional[List[str]] = None,
-        exclude: Optional[List[str]] = None,
+        select: Optional[Sequence[str]] = None,
+        models: Optional[Sequence[str]] = None,
+        exclude: Optional[Sequence[str]] = None,
         **kwargs,
     ) -> DbtCliOutput:
         """
@@ -217,7 +226,7 @@ class DbtCliResource(DbtResource):
         """
         return self.cli("ls", select=select, models=models, exclude=exclude, **kwargs)
 
-    def build(self, select: Optional[List[str]] = None, **kwargs) -> DbtCliOutput:
+    def build(self, select: Optional[Sequence[str]] = None, **kwargs) -> DbtCliOutput:
         """
         Run the ``build`` command on a dbt project. kwargs are passed in as additional parameters.
 
@@ -230,7 +239,7 @@ class DbtCliResource(DbtResource):
         """
         return self.cli("build", select=select, **kwargs)
 
-    def freshness(self, select: Optional[List[str]] = None, **kwargs) -> DbtCliOutput:
+    def freshness(self, select: Optional[Sequence[str]] = None, **kwargs) -> DbtCliOutput:
         """
         Run the ``source snapshot-freshness`` command on a dbt project. kwargs are passed in as additional parameters.
 
@@ -257,7 +266,7 @@ class DbtCliResource(DbtResource):
         return self.cli("docs generate", compile=compile_project, **kwargs)
 
     def run_operation(
-        self, macro: str, args: Optional[Dict[str, Any]] = None, **kwargs
+        self, macro: str, args: Optional[Mapping[str, Any]] = None, **kwargs
     ) -> DbtCliOutput:
         """
         Run the ``run-operation`` command on a dbt project. kwargs are passed in as additional parameters.
@@ -273,7 +282,7 @@ class DbtCliResource(DbtResource):
 
         return self.cli(f"run-operation {macro}", args=args, **kwargs)
 
-    def get_run_results_json(self, **kwargs) -> Optional[Dict[str, Any]]:
+    def get_run_results_json(self, **kwargs) -> Optional[Mapping[str, Any]]:
         """
         Get a parsed version of the run_results.json file for the relevant dbt project.
 
@@ -293,7 +302,7 @@ class DbtCliResource(DbtResource):
         target_path = kwargs.get("target_path", self._target_path)
         remove_run_results(project_dir, target_path)
 
-    def get_manifest_json(self, **kwargs) -> Optional[Dict[str, Any]]:
+    def get_manifest_json(self, **kwargs) -> Optional[Mapping[str, Any]]:
         """
         Get a parsed version of the manifest.json file for the relevant dbt project.
 
