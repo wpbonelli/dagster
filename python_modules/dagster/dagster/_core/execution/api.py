@@ -986,7 +986,7 @@ def create_execution_plan(
     step_keys_to_execute: Optional[Sequence[str]] = None,
     known_state: Optional[KnownExecutionState] = None,
     instance_ref: Optional[InstanceRef] = None,
-    tags: Optional[Mapping[str, object]] = None,
+    tags: Optional[Mapping[str, str]] = None,
 ) -> ExecutionPlan:
     pipeline = _check_pipeline(pipeline)
     pipeline_def = pipeline.get_definition()
