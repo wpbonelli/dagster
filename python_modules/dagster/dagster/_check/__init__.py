@@ -426,6 +426,7 @@ def is_dict(
 ) -> Dict[U, V]:
     ...
 
+
 @overload
 def is_dict(
     obj: object,
@@ -434,6 +435,7 @@ def is_dict(
     additional_message: Optional[str] = ...,
 ) -> Dict[Any, Any]:
     ...
+
 
 def is_dict(
     obj: object,
