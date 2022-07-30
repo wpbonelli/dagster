@@ -68,6 +68,8 @@ class PackageSpec(
             ("run_pytest", bool),
             ("run_mypy", bool),
             ("run_pylint", bool),
+            ("run_pyright", bool),
+            ("run_pyright_coverage", bool),
         ],
     )
 ):
@@ -115,11 +117,17 @@ class PackageSpec(
             Python version. Enabled by default.
         run_pylint (bool, optional): Whether to run pylint. Runs in the highest available supported
             Python version. Enabled by default.
+        run_pyright (bool, optional): Whether to run pyright to typecheck the package. Pyright is a
+            NodeJS program, so does not use a Python version. Disabled by default.
+        run_pyright_coverage (bool, optional): Whether to run `pyright --verifytypes` to assess
+            library for 100% public API type coverage. Pyright is a NodeJS program, so does not use
+            a Python version. Disabled by default.
     """
 
     def __new__(
         cls,
         directory: str,
+        *,
         name: Optional[str] = None,
         package_type: Optional[str] = None,
         unsupported_python_versions: Optional[List[AvailablePythonVersion]] = None,
@@ -135,6 +143,8 @@ class PackageSpec(
         run_pytest: bool = True,
         run_mypy: bool = True,
         run_pylint: bool = True,
+        run_pyright: bool = False,
+        run_pyright_coverage: bool = False,
     ):
         package_type = package_type or _infer_package_type(directory)
         return super(PackageSpec, cls).__new__(
@@ -155,6 +165,8 @@ class PackageSpec(
             run_pytest,
             run_mypy,
             run_pylint,
+            run_pyright,
+            run_pyright_coverage,
         )
 
     def build_steps(self) -> List[GroupStep]:
@@ -250,6 +262,28 @@ class PackageSpec(
                     "pylint",
                     base_label=base_name,
                     command_type="pylint",
+                    python_version=supported_python_versions[-1],
+                )
+            )
+
+        if self.run_pyright:
+            steps.append(
+                build_tox_step(
+                    self.directory,
+                    "pyright",
+                    base_label=base_name,
+                    command_type="pyright",
+                    python_version=supported_python_versions[-1],
+                )
+            )
+
+        if self.run_pyright_coverage:
+            steps.append(
+                build_tox_step(
+                    self.directory,
+                    "pyright-coverage",
+                    base_label=base_name,
+                    command_type="pyright-coverage",
                     python_version=supported_python_versions[-1],
                 )
             )
