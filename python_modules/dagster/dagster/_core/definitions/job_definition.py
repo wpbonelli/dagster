@@ -809,7 +809,7 @@ def default_job_io_manager(init_context: "InitResourceContext"):
 
 def _config_mapping_with_default_value(
     inner_schema: ConfigType,
-    default_config: Dict[str, Any],
+    default_config: Mapping[str, Any],
     job_name: str,
 ) -> ConfigMapping:
     if not isinstance(inner_schema, Shape):
