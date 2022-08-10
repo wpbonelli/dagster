@@ -150,9 +150,9 @@ def test_compute_log_manager_subscriptions():
             result.run_id, step_key, ComputeIOType.STDERR
         )
         stdout = []
-        stdout_observable.subscribe(stdout.append)
+        stdout_observable(stdout.append)
         stderr = []
-        stderr_observable.subscribe(stderr.append)
+        stderr_observable(stderr.append)
         assert len(stdout) == 1
         assert stdout[0].data.startswith(HELLO_SOLID)
         assert stdout[0].cursor in [12, 13]
@@ -180,7 +180,7 @@ def test_compute_log_manager_subscription_updates():
         # set up the subscription
         messages = []
         observable = compute_log_manager.observable(run_id, step_key, ComputeIOType.STDOUT)
-        observable.subscribe(messages.append)
+        observable(messages.append)
 
         # returns a single update, with 0 data
         assert len(messages) == 1

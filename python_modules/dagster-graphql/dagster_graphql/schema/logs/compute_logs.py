@@ -25,7 +25,7 @@ class GrapheneComputeLogFile(graphene.ObjectType):
     download_url = graphene.Field(graphene.String)
 
 
-def from_compute_log_file(_graphene_info, file):
+def from_compute_log_file(file: ComputeLogFileData):
     check.opt_inst_param(file, "file", ComputeLogFileData)
     if not file:
         return None

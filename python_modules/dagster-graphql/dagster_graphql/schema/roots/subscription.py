@@ -1,10 +1,9 @@
 import graphene
 
-import dagster._check as check
 from dagster._core.storage.compute_log_manager import ComputeIOType
 
-from ...implementation.execution import get_compute_log_observable, get_pipeline_run_observable
-from ..external import GrapheneLocationStateChangeSubscription, get_location_state_change_observable
+from ...implementation.execution import gen_compute_logs, gen_events_for_run
+from ..external import GrapheneLocationStateChangeSubscription, gen_location_state_changes
 from ..logs.compute_logs import GrapheneComputeIOType, GrapheneComputeLogFile
 from ..pipelines.subscription import GraphenePipelineRunLogsSubscriptionPayload
 
@@ -36,14 +35,11 @@ class GrapheneDagitSubscription(graphene.ObjectType):
         description="Retrieve real-time events when a location in the workspace undergoes a state change.",
     )
 
-    def resolve_pipelineRunLogs(self, graphene_info, runId, cursor=None):
-        return get_pipeline_run_observable(graphene_info, runId, cursor)
+    def subscribe_pipelineRunLogs(self, graphene_info, runId, cursor=None):
+        return gen_events_for_run(graphene_info, runId, cursor)
 
-    def resolve_computeLogs(self, graphene_info, runId, stepKey, ioType, cursor=None):
-        check.str_param(ioType, "ioType")  # need to resolve to enum
-        return get_compute_log_observable(
-            graphene_info, runId, stepKey, ComputeIOType(ioType), cursor
-        )
+    def subscribe_computeLogs(self, graphene_info, runId, stepKey, ioType, cursor=None):
+        return gen_compute_logs(graphene_info, runId, stepKey, ComputeIOType(ioType), cursor)
 
-    def resolve_locationStateChangeEvents(self, graphene_info):
-        return get_location_state_change_observable(graphene_info)
+    def subscribe_locationStateChangeEvents(self, graphene_info):
+        return gen_location_state_changes(graphene_info)

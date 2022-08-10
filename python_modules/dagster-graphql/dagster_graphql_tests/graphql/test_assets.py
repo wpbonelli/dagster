@@ -511,7 +511,7 @@ class TestAssetAwareEventLog(ExecutingGraphQLContextTestMatrix):
         result = execute_dagster_graphql(
             graphql_context,
             GET_ASSET_MATERIALIZATION_TIMESTAMP,
-            variables={"assetKey": {"path": ["a"]}, "asOf": as_of_timestamp},
+            variables={"assetKey": {"path": ["a"]}, "asOf": str(as_of_timestamp)},
         )
         assert result.data
         assert result.data["assetOrError"]
@@ -525,7 +525,7 @@ class TestAssetAwareEventLog(ExecutingGraphQLContextTestMatrix):
         result = execute_dagster_graphql(
             graphql_context,
             GET_ASSET_MATERIALIZATION_AFTER_TIMESTAMP,
-            variables={"assetKey": {"path": ["a"]}, "afterTimestamp": after_timestamp},
+            variables={"assetKey": {"path": ["a"]}, "afterTimestamp": str(after_timestamp)},
         )
         assert result.data
         assert result.data["assetOrError"]
@@ -538,7 +538,7 @@ class TestAssetAwareEventLog(ExecutingGraphQLContextTestMatrix):
         result = execute_dagster_graphql(
             graphql_context,
             GET_ASSET_MATERIALIZATION_AFTER_TIMESTAMP,
-            variables={"assetKey": {"path": ["a"]}, "afterTimestamp": after_timestamp},
+            variables={"assetKey": {"path": ["a"]}, "afterTimestamp": str(after_timestamp)},
         )
         assert result.data
         assert result.data["assetOrError"]

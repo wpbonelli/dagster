@@ -4,7 +4,17 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
+
+snapshots['TestComputeLogs.test_compute_logs_subscription_graphql[postgres_with_default_run_launcher_deployed_grpc_env] 1'] = [
+    {
+        'computeLogs': {
+            'data': '''HELLO WORLD
+'''
+        }
+    }
+]
 
 snapshots['TestComputeLogs.test_compute_logs_subscription_graphql[sqlite_with_default_run_launcher_deployed_grpc_env] 1'] = [
     {

@@ -66,7 +66,6 @@ def launch_reexecution_from_parent_run(graphene_info, parent_run_id: str, strate
 
     check.inst_param(graphene_info, "graphene_info", ResolveInfo)
     check.str_param(parent_run_id, "parent_run_id")
-    check.str_param(strategy, "strategy")
 
     instance: DagsterInstance = graphene_info.context.instance
     parent_run = instance.get_run_by_id(parent_run_id)
@@ -86,7 +85,7 @@ def launch_reexecution_from_parent_run(graphene_info, parent_run_id: str, strate
         parent_run,
         repo_location,
         external_pipeline,
-        ReexecutionStrategy[strategy],
+        ReexecutionStrategy(strategy),
         use_parent_run_tags=True,  # inherit whatever tags were set on the parent run at launch time
     )
     graphene_info.context.instance.submit_run(

@@ -5,6 +5,7 @@ import warnings
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from contextlib import ExitStack
+from itertools import count
 from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 
 import dagster._check as check
@@ -41,8 +42,6 @@ from .permissions import PermissionResult, get_user_permissions
 from .workspace import IWorkspace, WorkspaceLocationEntry, WorkspaceLocationLoadStatus
 
 if TYPE_CHECKING:
-    from rx.subjects import Subject
-
     from dagster._core.host_representation import (
         ExternalPartitionConfigData,
         ExternalPartitionExecutionErrorData,
@@ -343,11 +342,6 @@ class IWorkspaceProcessContext(ABC):
     def version(self) -> str:
         pass
 
-    @property
-    @abstractmethod
-    def location_state_events(self) -> "Subject":
-        pass
-
     @abstractmethod
     def reload_repository_location(self, name: str) -> None:
         pass
@@ -396,17 +390,9 @@ class WorkspaceProcessContext(IWorkspaceProcessContext):
         check.opt_str_param(version, "version")
         check.bool_param(read_only, "read_only")
 
-        # lazy import for perf
-        from rx.subjects import Subject
-
         self._instance = check.inst_param(instance, "instance", DagsterInstance)
         self._workspace_load_target = check.opt_inst_param(
             workspace_load_target, "workspace_load_target", WorkspaceLoadTarget
-        )
-
-        self._location_state_events = Subject()
-        self._location_state_subscriber = LocationStateSubscriber(
-            self._location_state_events_handler
         )
 
         self._read_only = read_only
@@ -420,8 +406,9 @@ class WorkspaceProcessContext(IWorkspaceProcessContext):
         self._watch_thread_shutdown_events: Dict[str, threading.Event] = {}
         self._watch_threads: Dict[str, threading.Thread] = {}
 
-        self._state_subscribers: List[LocationStateSubscriber] = []
-        self.add_state_subscriber(self._location_state_subscriber)
+        self._state_subscriber_id_iter = count()
+        self._state_subscribers: Dict[int, LocationStateSubscriber] = {}
+        self.add_state_subscriber(LocationStateSubscriber(self._location_state_events_handler))
 
         if grpc_server_registry:
             self._grpc_server_registry: GrpcServerRegistry = check.inst_param(
@@ -445,8 +432,14 @@ class WorkspaceProcessContext(IWorkspaceProcessContext):
     def workspace_load_target(self):
         return self._workspace_load_target
 
-    def add_state_subscriber(self, subscriber):
-        self._state_subscribers.append(subscriber)
+    def add_state_subscriber(self, subscriber: LocationStateSubscriber) -> int:
+        token = next(self._state_subscriber_id_iter)
+        self._state_subscribers[token] = subscriber
+        return token
+
+    def rm_state_subscriber(self, token: int) -> None:
+        if token in self._state_subscribers:
+            del self._state_subscribers[token]
 
     def _load_workspace(self):
         assert self._lock.locked()
@@ -515,7 +508,7 @@ class WorkspaceProcessContext(IWorkspaceProcessContext):
 
     def _send_state_event_to_subscribers(self, event: LocationStateChangeEvent) -> None:
         check.inst_param(event, "event", LocationStateChangeEvent)
-        for subscriber in self._state_subscribers:
+        for subscriber in self._state_subscribers.values():
             subscriber.handle_event(event)
 
     def _start_watch_thread(self, origin: GrpcServerRepositoryLocationOrigin) -> None:
@@ -649,10 +642,6 @@ class WorkspaceProcessContext(IWorkspaceProcessContext):
             source=source,
         )
 
-    @property
-    def location_state_events(self) -> "Subject":
-        return self._location_state_events
-
     def _location_state_events_handler(self, event: LocationStateChangeEvent) -> None:
         # If the server was updated or we were not able to reconnect, we immediately reload the
         # location handle
@@ -665,8 +654,6 @@ class WorkspaceProcessContext(IWorkspaceProcessContext):
             # In case of a location error, just reload the handle in order to update the workspace
             # with the correct error messages
             self.reload_repository_location(event.location_name)
-
-        self._location_state_events.on_next(event)
 
     def __enter__(self):
         return self
