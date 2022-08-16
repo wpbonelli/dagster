@@ -1,8 +1,9 @@
 import os
 import sys
 import time
+from logging import Logger
+from typing import Iterable, Optional, Sequence, Tuple
 
-import dagster._check as check
 from dagster._core.errors import DagsterBackfillFailedError
 from dagster._core.execution.backfill import (
     BulkActionStatus,
@@ -13,7 +14,7 @@ from dagster._core.instance import DagsterInstance
 from dagster._core.storage.pipeline_run import PipelineRun, RunsFilter
 from dagster._core.storage.tags import PARTITION_NAME_TAG
 from dagster._core.workspace import IWorkspace
-from dagster._utils.error import serializable_error_info_from_exc_info
+from dagster._utils.error import SerializableErrorInfo, serializable_error_info_from_exc_info
 
 # out of abundance of caution, sleep at checkpoints in case we are pinning CPU by submitting lots
 # of jobs all at once
@@ -34,15 +35,14 @@ def _check_for_debug_crash(debug_crash_flags, key):
     raise Exception("Process didn't terminate after sending crash signal")
 
 
-def execute_backfill_iteration(instance, workspace, logger, debug_crash_flags=None):
-    check.inst_param(instance, "instance", DagsterInstance)
-    check.inst_param(workspace, "workspace", IWorkspace)
-
+def execute_backfill_iteration(
+    instance: DagsterInstance, workspace: IWorkspace, logger: Logger, debug_crash_flags=None
+) -> Iterable[Optional[SerializableErrorInfo]]:
     backfill_jobs = instance.get_backfills(status=BulkActionStatus.REQUESTED)
 
     if not backfill_jobs:
         logger.debug("No backfill jobs requested.")
-        yield
+        yield None
         return
 
     for backfill_job in backfill_jobs:
@@ -91,7 +91,7 @@ def execute_backfill_iteration(instance, workspace, logger, debug_crash_flags=No
                     for _run_id in submit_backfill_runs(
                         instance, workspace, repo_location, backfill_job, chunk
                     ):
-                        yield
+                        yield None
                         # before submitting, refetch the backfill job to check for status changes
                         backfill_job = instance.get_backfill(backfill_job.backfill_id)
                         if backfill_job.status != BulkActionStatus.REQUESTED:
@@ -103,14 +103,14 @@ def execute_backfill_iteration(instance, workspace, logger, debug_crash_flags=No
                     # refetch, in case the backfill was updated in the meantime
                     backfill_job = instance.get_backfill(backfill_job.backfill_id)
                     instance.update_backfill(backfill_job.with_partition_checkpoint(checkpoint))
-                    yield
+                    yield None
                     time.sleep(CHECKPOINT_INTERVAL)
                 else:
                     logger.info(
                         f"Backfill completed for {backfill_id} for {len(backfill_job.partition_names)} partitions"
                     )
                     instance.update_backfill(backfill_job.with_status(BulkActionStatus.COMPLETED))
-                    yield
+                    yield None
         except Exception:
             error_info = serializable_error_info_from_exc_info(sys.exc_info())
             instance.update_backfill(
@@ -120,8 +120,9 @@ def execute_backfill_iteration(instance, workspace, logger, debug_crash_flags=No
             yield error_info
 
 
-def _get_partitions_chunk(instance, logger, backfill_job, chunk_size):
-    check.inst_param(backfill_job, "backfill_job", PartitionBackfill)
+def _get_partitions_chunk(
+    instance: DagsterInstance, logger: Logger, backfill_job: PartitionBackfill, chunk_size: int
+) -> Tuple[Sequence[str], str, bool]:
     partition_names = backfill_job.partition_names
     checkpoint = backfill_job.last_submitted_partition_name
 

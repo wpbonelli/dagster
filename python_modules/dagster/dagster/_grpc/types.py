@@ -1,4 +1,4 @@
-from typing import Any, Dict, FrozenSet, List, Mapping, NamedTuple, Optional
+from typing import Any, Dict, FrozenSet, List, Mapping, NamedTuple, Optional, Sequence
 
 import dagster._check as check
 from dagster._core.code_pointer import CodePointer
@@ -388,7 +388,7 @@ class PartitionSetExecutionParamArgs(
         [
             ("repository_origin", ExternalRepositoryOrigin),
             ("partition_set_name", str),
-            ("partition_names", List[str]),
+            ("partition_names", Sequence[str]),
         ],
     )
 ):
@@ -396,7 +396,7 @@ class PartitionSetExecutionParamArgs(
         cls,
         repository_origin: ExternalRepositoryOrigin,
         partition_set_name: str,
-        partition_names: List[str],
+        partition_names: Sequence[str],
     ):
         return super(PartitionSetExecutionParamArgs, cls).__new__(
             cls,

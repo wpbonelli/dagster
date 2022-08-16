@@ -2,7 +2,7 @@
 
 import os
 import sys
-from typing import Generator, List, Optional
+from typing import Generator, List, Optional, Sequence, Union
 
 import pendulum
 
@@ -395,7 +395,9 @@ def get_external_execution_plan_snapshot(recon_pipeline, args):
         )
 
 
-def get_partition_set_execution_param_data(recon_repo, partition_set_name, partition_names):
+def get_partition_set_execution_param_data(
+    recon_repo, partition_set_name: str, partition_names: Sequence[str]
+) -> Union[ExternalPartitionSetExecutionParamData, ExternalPartitionExecutionErrorData]:
     repo_definition = recon_repo.get_definition()
     partition_set_def = repo_definition.get_partition_set_def(partition_set_name)
     try:
