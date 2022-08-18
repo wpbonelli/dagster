@@ -50,7 +50,6 @@ class CapturedLogManager(ABC, MayHaveInstanceWeakref):
             log_key (String): The log key identifying the captured logs
             namespace (Optional[String]): The namespace of the log key
         """
-        pass
 
     @abstractmethod
     def is_capture_complete(self, log_key: str, namespace: Optional[str] = None):
@@ -63,7 +62,6 @@ class CapturedLogManager(ABC, MayHaveInstanceWeakref):
         Returns:
             Boolean
         """
-        pass
 
     @abstractmethod
     def get_stdout(
@@ -84,7 +82,6 @@ class CapturedLogManager(ABC, MayHaveInstanceWeakref):
         Returns:
             CapturedLogData
         """
-        pass
 
     @abstractmethod
     def get_stderr(
@@ -105,7 +102,6 @@ class CapturedLogManager(ABC, MayHaveInstanceWeakref):
         Returns:
             CapturedLogData
         """
-        pass
 
     @abstractmethod
     def get_stdout_metadata(
@@ -121,7 +117,6 @@ class CapturedLogManager(ABC, MayHaveInstanceWeakref):
         Returns:
             CapturedLogMetadata
         """
-        pass
 
     @abstractmethod
     def get_stderr_metadata(
@@ -137,4 +132,3 @@ class CapturedLogManager(ABC, MayHaveInstanceWeakref):
         Returns:
             CapturedLogMetadata
         """
-        pass
