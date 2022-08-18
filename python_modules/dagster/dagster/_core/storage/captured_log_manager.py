@@ -36,16 +36,33 @@ class CapturedLogMetadata(
 
 
 class CapturedLogManager(ABC, MayHaveInstanceWeakref):
-    """Abstract base class for capturing the unstructured compute logs (stdout/stderr) in the
-    current process, stored / retrieved with a provided log_key and namespace."""
+    """Abstract base class for capturing the unstructured logs (stdout/stderr) in the current
+    process, stored / retrieved with a provided log_key and namespace."""
 
     @abstractmethod
     @contextmanager
     def capture_logs(self, log_key: str, namespace: Optional[str] = None):
+        """
+        Context manager for capturing the stdout/stderr within the current process, and persisting
+        it under the given log key / namespace.
+
+        Args:
+            log_key (String): The log key identifying the captured logs
+            namespace (Optional[String]): The namespace of the log key
+        """
         pass
 
     @abstractmethod
     def is_capture_complete(self, log_key: str, namespace: Optional[str] = None):
+        """Flag indicating when the log capture for a given log key has completed.
+
+        Args:
+            log_key (String): The log key identifying the captured logs
+            namespace (Optional[String]): The namespace of the log key
+
+        Returns:
+            Boolean
+        """
         pass
 
     @abstractmethod
@@ -53,9 +70,20 @@ class CapturedLogManager(ABC, MayHaveInstanceWeakref):
         self,
         log_key: str,
         namespace: Optional[str] = None,
-        cursor: str = None,
-        max_bytes: int = None,
+        cursor: Optional[str] = None,
+        max_bytes: Optional[int] = None,
     ) -> CapturedLogData:
+        """Returns a chunk of the captured stdout logs for a given log key
+
+        Args:
+            log_key (String): The log key identifying the captured logs
+            namespace (Optional[String]): The namespace of the log key
+            cursor (Optional[str]): A cursor representing the position of the log chunk to fetch
+            max_bytes (Optional[int]): A limit on the size of the log chunk to fetch
+
+        Returns:
+            CapturedLogData
+        """
         pass
 
     @abstractmethod
@@ -66,16 +94,47 @@ class CapturedLogManager(ABC, MayHaveInstanceWeakref):
         cursor: str = None,
         max_bytes: int = None,
     ) -> CapturedLogData:
+        """Returns a chunk of the captured stderr logs for a given log key
+
+        Args:
+            log_key (String): The log key identifying the captured logs
+            namespace (Optional[String]): The namespace of the log key
+            cursor (Optional[str]): A cursor representing the position of the log chunk to fetch
+            max_bytes (Optional[int]): A limit on the size of the log chunk to fetch
+
+        Returns:
+            CapturedLogData
+        """
         pass
 
     @abstractmethod
     def get_stdout_metadata(
         self, log_key: str, namespace: Optional[str] = None
     ) -> CapturedLogMetadata:
+        """Returns the metadata of the captured stdout logs for a given log key, including
+        displayable information on where the logs are persisted.
+
+        Args:
+            log_key (String): The log key identifying the captured logs
+            namespace (Optional[String]): The namespace of the log key
+
+        Returns:
+            CapturedLogMetadata
+        """
         pass
 
     @abstractmethod
     def get_stderr_metadata(
         self, log_key: str, namespace: Optional[str] = None
     ) -> CapturedLogMetadata:
+        """Returns the metadata of the captured stderr logs for a given log key, including
+        displayable information on where the logs are persisted.
+
+        Args:
+            log_key (String): The log key identifying the captured logs
+            namespace (Optional[String]): The namespace of the log key
+
+        Returns:
+            CapturedLogMetadata
+        """
         pass
