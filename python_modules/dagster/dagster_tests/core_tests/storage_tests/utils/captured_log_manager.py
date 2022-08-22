@@ -35,7 +35,7 @@ class TestCapturedLogManager:
         should_disable_io_stream_redirect(), reason="compute logs disabled for win / py3.6+"
     )
     def test_capture(self, captured_log_manager):
-        log_key = "foo"
+        log_key = ["foo"]
 
         with captured_log_manager.capture_logs(log_key):
             print("HELLO WORLD")  # pylint: disable=print-call
@@ -64,7 +64,7 @@ class TestCapturedLogManager:
         should_disable_io_stream_redirect(), reason="compute logs disabled for win / py3.6+"
     )
     def test_long_key(self, captured_log_manager):
-        log_key = "".join(random.choice(string.ascii_lowercase) for x in range(300))
+        log_key = ["".join(random.choice(string.ascii_lowercase) for x in range(300))]
 
         with captured_log_manager.capture_logs(log_key):
             print("HELLO WORLD")  # pylint: disable=print-call
