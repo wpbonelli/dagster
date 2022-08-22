@@ -174,7 +174,7 @@ class LocalComputeLogManager(CapturedLogManager, ComputeLogManager, Configurable
         return self._get_captured_local_path(log_key, IO_TYPE_EXTENSION[io_type])
 
     def read_logs_file(self, run_id, key, io_type, cursor=0, max_bytes=MAX_BYTES_FILE_READ):
-        path = self.get_local_path([run_id, key], io_type)
+        path = self.get_local_path(run_id, key, io_type)
 
         if not os.path.exists(path) or not os.path.isfile(path):
             return ComputeLogFileData(path=path, data=None, cursor=0, size=0, download_url=None)
@@ -197,7 +197,8 @@ class LocalComputeLogManager(CapturedLogManager, ComputeLogManager, Configurable
         )
 
     def is_watch_completed(self, run_id, key):
-        return self.is_capture_complete([run_id, key])
+        log_key = self.build_log_key(run_id, key)
+        return self.is_capture_complete(log_key)
 
     def on_watch_start(self, pipeline_run, step_key):
         pass
