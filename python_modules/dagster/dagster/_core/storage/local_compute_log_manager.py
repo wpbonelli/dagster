@@ -196,6 +196,11 @@ class LocalComputeLogManager(CapturedLogManager, ComputeLogManager, Configurable
             download_url=download_url,
         )
 
+    def get_key(self, pipeline_run, step_key):
+        check.inst_param(pipeline_run, "pipeline_run", PipelineRun)
+        check.opt_str_param(step_key, "step_key")
+        return step_key or pipeline_run.pipeline_name
+
     def is_watch_completed(self, run_id, key):
         log_key = self.build_log_key(run_id, key)
         return self.is_capture_complete(log_key)
