@@ -45,25 +45,25 @@ def solid_invocation_result(
         if isinstance(solid_def_or_invocation, PendingNodeInvocation)
         else solid_def_or_invocation
     )
-
     _check_invocation_requirements(solid_def, context)
 
-    context = (context or build_solid_context()).bind(solid_def_or_invocation)
+    with (context or build_solid_context()) as open_context:
+        bound_context = open_context.bind(solid_def_or_invocation)
 
-    input_dict = _resolve_inputs(solid_def, args, kwargs, context)
+        input_dict = _resolve_inputs(solid_def, args, kwargs, bound_context)
 
-    compute_fn = solid_def.compute_fn
-    if not isinstance(compute_fn, DecoratedSolidFunction):
-        check.failed("solid invocation only works with decorated solid fns")
+        compute_fn = solid_def.compute_fn
+        if not isinstance(compute_fn, DecoratedSolidFunction):
+            check.failed("solid invocation only works with decorated solid fns")
 
-    compute_fn = cast(DecoratedSolidFunction, compute_fn)
-    result = (
-        compute_fn.decorated_fn(context, **input_dict)
-        if compute_fn.has_context_arg()
-        else compute_fn.decorated_fn(**input_dict)
-    )
+        compute_fn = cast(DecoratedSolidFunction, compute_fn)
+        result = (
+            compute_fn.decorated_fn(bound_context, **input_dict)
+            if compute_fn.has_context_arg()
+            else compute_fn.decorated_fn(**input_dict)
+        )
 
-    return _type_check_output_wrapper(solid_def, result, context)
+        return _type_check_output_wrapper(solid_def, result, bound_context)
 
 
 def _check_invocation_requirements(
